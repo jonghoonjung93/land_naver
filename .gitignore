@@ -9,7 +9,6 @@ __pycache__
 .DS*
 tmp
 node_modules
-module
 telegram
 run.sh
 data
