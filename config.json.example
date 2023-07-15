@@ -1,0 +1,22 @@
+{
+  "GRIS_GG": {
+    "URL": "---"
+  },
+  "GG_DATA": {
+    "KEY": "---"
+  },
+  "TELEGRAM": {
+    "TOKEN": "---",
+    "CHAT-ID": ["---", "---"]
+  },
+  "TELEGRAM-TEST": {
+    "TOKEN": "---",
+    "CHAT-ID": ["---"],
+  },
+  "BLD1-01": {
+    "MEMO": "---",
+    "ADDRESS": "---",
+    "URL": "---",
+    "NAVER_BLD_ID": "---"
+  }
+}
