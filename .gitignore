@@ -6,6 +6,7 @@ __pycache__
 *.log
 *.err
 *.sqlite3
+.DS*
 tmp
 node_modules
 module
