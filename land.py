@@ -1,5 +1,7 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.keys import Keys
@@ -111,6 +113,30 @@ def land_naver(building):
 	
 	for item in items:
 		name = item.find_element(By.CLASS_NAME, 'text').text
+		# --- 매물번호 가져오기 (item_number) ----------------------------------------------------------------- #
+		try:	# "네이버에서 보기" 버튼이 있는 경우
+			naver_view = item.find_element(By.CLASS_NAME, 'label.label--cp')
+			# printL(f"naver_view : {naver_view.text}")
+			if naver_view.text == "네이버에서 보기":
+				naver_view.click()
+		except:	# "네이버에서 보기" 버튼이 없는 경우
+			try:
+				item.find_element(By.CLASS_NAME, 'text').click()
+			except:
+				pass
+		# wait = WebDriverWait(driver, 10)
+		# new_url = wait.until(EC.url_changes(driver.current_url))
+		try:
+			new_url = driver.current_url
+			# printL(f"Changed URL: {new_url}")
+			split_url = new_url.split("=")
+			last_part = split_url[-1]
+			item_number = last_part.split("&")[0]
+			# printL(item_number)
+			naver_bld_id = item_number	# naver_bld_id 는 클릭하고 나면 필요없으니, 여기부터는 이걸 매물번호로 활용
+		except:
+			naver_bld_id = "0000000000"
+		# ------------------------------------------------------------------------------------------------ #
 		type = item.find_element(By.CLASS_NAME, 'type').text
 		price = item.find_element(By.CLASS_NAME, 'price').text
 		info_area_type = item.find_element(By.CLASS_NAME, 'info_area').find_element(By.CLASS_NAME, 'type').text
@@ -177,7 +203,7 @@ def land_naver(building):
 	conn.commit()
 	conn.close()
 
-
+	# time.sleep(1000)
 	driver.quit()
 	return(new_list)
 
@@ -239,7 +265,10 @@ def send_lists(lists):	# 전일자와 비교해서 현재 새로운 매물리스
 				ho = list[17]
 			# if msg_content is not None:
 			# 	msg_content = msg_content + "\n"
-			msg_content = f"{msg_content}\*{list[2]}({list[3]}): {list[6]} {list[7]}\n - {list[8]} {list[12]}\n - {list[16]}\n - 호수 : _{ho}_\n"
+			# tuple1 = (formatted_date, bld_id, memo, address_short, url, naver_bld_id, name, type, price, price_base, price_mon, info_area_type, info_area_spec, size_total, size_real, floor, agent_name, ho)
+			deep_link = f"https://new.land.naver.com/offices?articleNo={list[5]}"
+			# msg_content = f"{msg_content}\*{list[2]}({list[3]}): {list[6]} {list[7]}\n - {list[8]} {list[12]}\n - {list[16]}\n - 호수 : _{ho}_\n"
+			msg_content = f"{msg_content}\*[{list[2]}({list[3]})]({deep_link}): {list[6]} {list[7]}\n - {list[8]} {list[12]}\n - {list[16]}\n - 호수 : _{ho}_\n"
 		printL(msg_content)
 		global global_msg_contents
 		global_msg_contents.append(msg_content)		# 메세지를 바로 보내지 않고 global list 변수에 담아놓기
@@ -282,7 +311,7 @@ if flag:
 
 #------- 각 건물별로 실행 ----------------------
 # send_lists(land_naver('BLD1-05'))
-# send_lists(land_naver('BLD1-06'))
+# send_lists(land_naver('BLD1-02'))
 flag = True
 if flag:
 	send_lists(land_naver('BLD1-01'))
