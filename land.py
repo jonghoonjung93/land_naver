@@ -71,6 +71,7 @@ def land_naver(building):
 
 	# 해당건물 클릭
 	driver.find_element(By.ID, naver_bld_id).find_element(By.CLASS_NAME, 'marker_transparent').click()	# 건물 동그라미 클릭
+	# time.sleep(1000)
 	time.sleep(2)
 
 	scroll_bar = driver.find_element(By.XPATH, '//*[@id="listContents1"]/div')	# 좌측 매물리스트 스크롤바
@@ -311,7 +312,7 @@ if flag:
 
 #------- 각 건물별로 실행 ----------------------
 # send_lists(land_naver('BLD1-05'))
-# send_lists(land_naver('BLD1-02'))
+# send_lists(land_naver('BLD1-19'))
 flag = True
 if flag:
 	send_lists(land_naver('BLD1-01'))
