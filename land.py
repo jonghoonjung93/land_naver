@@ -12,10 +12,17 @@ import telegram
 import asyncio, json
 import time, datetime
 import csv
+from openpyxl import load_workbook	# 엑셀 읽기위해 추가
 import sqlite3
 
 global_var = 0
 global_msg_contents = []
+
+"""
+from selenium.common.exceptions import NoSuchElementException
+try:
+except NoSuchElementException:
+"""
 
 def land_naver(building):
 	options = Options()
@@ -39,9 +46,13 @@ def land_naver(building):
 	# options.add_argument("disable-gpu")
 	# options.add_argument("lang=ko_KR")
 
+	flag = False	# ----- TEST 환경에서 임시로 headless 사용할때만 True 로 놓고 사용 (아직 잘안됨, 해결필요) ---------------
+	if flag:
+		options.add_argument('headless')
+
 	# 아래는 headless 크롤링을 막아놓은곳에 필요 (user agent에 HeadlessChrome 이 표시되는걸 방지)
 	options.add_argument('user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36')
-	
+		
     # config.json 파일처리 ----------------
 	with open('config.json','r') as f:
 		config = json.load(f)
@@ -54,23 +65,56 @@ def land_naver(building):
 	driver = webdriver.Chrome(options=options)
 
     # 건물정보 csv 파일처리 ----------------
-	csv_data = []
-	address_short = address.replace("고양시 일산동구 ","")
-	file_name = f"csv/{building[3:]}_{memo}({address_short}).csv"
-	with open(file_name,'r') as file:	# csv_data 라는 변수에 건물정보를 저장
-		reader = csv.reader(file)
-		for line in reader:
-			csv_data.append(line)
-	# for line in csv_data:	# line[0]:호수, line[1]:총면적, line[2]:전용면적, line[3]:세부용도
-	# 	print(line[1])
+	flag = False	# 엑셀방식으로 전환했음
+	if flag:
+		csv_data = []
+		address_short = address.replace("고양시 일산동구 ","")
+		file_name = f"csv/{building[3:]}_{memo}({address_short}).csv"
+		with open(file_name,'r') as file:	# csv_data 라는 변수에 건물정보를 저장
+			reader = csv.reader(file)
+			for line in reader:
+				csv_data.append(line)
+		# for line in csv_data:	# line[0]:호수, line[1]:총면적, line[2]:전용면적, line[3]:세부용도
+		# 	print(line[1])
 	# ------------------------------------
+
+	# 건물정보 excel 파일처리 ----------------------------
+	flag = True
+	if flag:
+		xlsx_data = []
+		address_short = address.replace("고양시 일산동구 ","")
+		file_name = f"xlsx/{building[3:]}_{memo}({address_short}).xlsx"
+		wb = load_workbook(file_name) # sample.xlsx 파일에서 wb 을 불러옴
+		ws = wb.active # 활성화된 Sheet
+
+		for x in range(1, ws.max_row + 1):
+			cell1 = ws.cell(row=x, column=1).value
+			cell2 = ws.cell(row=x, column=2).value
+			cell3 = ws.cell(row=x, column=3).value
+			cell4 = ws.cell(row=x, column=4).value
+			cell5 = ws.cell(row=x, column=5).value
+			cell6 = ws.cell(row=x, column=6).value
+			# cell7 = ws.cell(row=x, column=7).value
+			# cell8 = ws.cell(row=x, column=8).value
+			cell9 = ws.cell(row=x, column=9).value
+			# cell10 = ws.cell(row=x, column=10).value
+			#             호수, 총면적, 전용면적, 용도, 건물명, 구분, 구분, 층
+			temp_list = [cell4, cell5, cell6, cell9, cell1, cell2, cell3]
+			xlsx_data.append(temp_list)
+	# -----------------------------------------------
+
 
 	# 페이지 접속
 	driver.get(url)
-	time.sleep(2)
+	time.sleep(2)	# 20230718 : 2->4 변경
 
 	# 해당건물 클릭
-	driver.find_element(By.ID, naver_bld_id).find_element(By.CLASS_NAME, 'marker_transparent').click()	# 건물 동그라미 클릭
+	try:
+		driver.find_element(By.ID, naver_bld_id).find_element(By.CLASS_NAME, 'marker_transparent').click()	# 건물 동그라미 클릭
+	except:
+		printL("click retry...")
+		time.sleep(2)
+		driver.find_element(By.ID, naver_bld_id).find_element(By.CLASS_NAME, 'marker_transparent').click()	# 건물 동그라미 클릭2
 	# time.sleep(1000)
 	time.sleep(2)
 
@@ -92,7 +136,9 @@ def land_naver(building):
 
 	# 매물 가져오기
 	items = driver.find_element(By.CLASS_NAME, 'item_list.item_list--article').find_elements(By.CLASS_NAME, 'item.false')
+	# items_len = len(driver.find_element(By.CLASS_NAME, 'item_list.item_list--article').find_elements(By.CLASS_NAME, 'item.false'))
 	printL(f"building :  {building}({memo}), {len(items)}")	# 매물 개수 확인
+	# printL(f"building :  {building}({memo}), {items_len}")	# 매물 개수 확인
 
 	# 날짜 (오늘)
 	current_time = datetime.datetime.now()
@@ -112,8 +158,13 @@ def land_naver(building):
 	data_list = []	# DB에 insert 대상 매물 리스트
 	new_list = []	# 신규 매물 리스트 (알림 대상)
 	
+	# for item in items:
+	# for index in range(items_len):
 	for item in items:
+		# printL(index)
+		# item = driver.find_element(By.CLASS_NAME, 'item_list.item_list--article').find_elements(By.CLASS_NAME, 'item.false')[index]
 		name = item.find_element(By.CLASS_NAME, 'text').text
+		# printL(name)
 		# --- 매물번호 가져오기 (item_number) ----------------------------------------------------------------- #
 		try:	# "네이버에서 보기" 버튼이 있는 경우
 			naver_view = item.find_element(By.CLASS_NAME, 'label.label--cp')
@@ -158,7 +209,8 @@ def land_naver(building):
 		floor = var2.replace(' ','')[0]
 		ho = ''
 		try:	# csv 파일이 헤더만 있는경우 line[1]을 못가져오고 에러나는것에 대한 처리
-			for line in csv_data[1:]:	# line[0]:호수, line[1]:총면적, line[2]:전용면적, line[3]:세부용도
+			# for line in csv_data[1:]:	# line[0]:호수, line[1]:총면적, line[2]:전용면적, line[3]:세부용도
+			for line in xlsx_data[1:]:	# line[0]:호수, line[1]:총면적, line[2]:전용면적, line[3]:세부용도, 4:건물명, 5:구분, 6:층
 				csv_size1 = int(float(line[1]))	# 현황이 없으면 이부분에서 에러남
 				if csv_size1 == int(size_total) and floor == line[0][0]:	# 총면적이 같고, 층수가 같으면
 					# print(f"size1={size1}:{floor}, csv_size1={csv_size1}:{line[1]}:{line[0]}")
