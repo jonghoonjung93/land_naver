@@ -108,14 +108,25 @@ def land_naver(building):
 	driver.get(url)
 	time.sleep(2)	# 20230718 : 2->4 변경
 
+	new_list = []	# 신규 매물 리스트 (알림 대상)
+
 	# 해당건물 클릭
 	try:
 		driver.find_element(By.ID, naver_bld_id).find_element(By.CLASS_NAME, 'marker_transparent').click()	# 건물 동그라미 클릭
 	except:
 		printL("click retry...")
 		time.sleep(2)
-		driver.find_element(By.ID, naver_bld_id).find_element(By.CLASS_NAME, 'marker_transparent').click()	# 건물 동그라미 클릭2
+		try:
+			driver.get(url)
+			time.sleep(3)
+			driver.find_element(By.ID, naver_bld_id).find_element(By.CLASS_NAME, 'marker_transparent').click()	# 건물 동그라미 클릭2
+		except:
+			time.sleep(1)
+			printL("ERROR : marker click failed... return")
+			driver.quit()
+			return(new_list)
 	# time.sleep(1000)
+
 	time.sleep(2)
 
 	scroll_bar = driver.find_element(By.XPATH, '//*[@id="listContents1"]/div')	# 좌측 매물리스트 스크롤바
@@ -156,7 +167,7 @@ def land_naver(building):
 	cursor = conn.cursor()
 
 	data_list = []	# DB에 insert 대상 매물 리스트
-	new_list = []	# 신규 매물 리스트 (알림 대상)
+	
 	
 	# for item in items:
 	# for index in range(items_len):
@@ -364,7 +375,7 @@ if flag:
 
 #------- 각 건물별로 실행 ----------------------
 # send_lists(land_naver('BLD1-05'))
-# send_lists(land_naver('BLD1-19'))
+# send_lists(land_naver('BLD2-09'))
 flag = True
 if flag:
 	send_lists(land_naver('BLD1-01'))
