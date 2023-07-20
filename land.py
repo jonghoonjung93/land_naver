@@ -16,6 +16,7 @@ from openpyxl import load_workbook	# 엑셀 읽기위해 추가
 import sqlite3
 
 global_var = 0
+global_err = 0
 global_msg_contents = []
 
 """
@@ -95,11 +96,11 @@ def land_naver(building):
 			cell5 = ws.cell(row=x, column=5).value
 			cell6 = ws.cell(row=x, column=6).value
 			# cell7 = ws.cell(row=x, column=7).value
-			# cell8 = ws.cell(row=x, column=8).value
+			cell8 = ws.cell(row=x, column=8).value
 			cell9 = ws.cell(row=x, column=9).value
 			# cell10 = ws.cell(row=x, column=10).value
-			#             호수, 총면적, 전용면적, 용도, 건물명, 구분, 구분, 층
-			temp_list = [cell4, cell5, cell6, cell9, cell1, cell2, cell3]
+			#             호수,  총면적,  전용면적, 용도,  건물명,  구분,   층 ,   전용(평)
+			temp_list = [cell4, cell5, cell6, cell9, cell1, cell2, cell3, cell8]
 			xlsx_data.append(temp_list)
 	# -----------------------------------------------
 
@@ -221,13 +222,14 @@ def land_naver(building):
 		ho = ''
 		try:	# csv 파일이 헤더만 있는경우 line[1]을 못가져오고 에러나는것에 대한 처리
 			# for line in csv_data[1:]:	# line[0]:호수, line[1]:총면적, line[2]:전용면적, line[3]:세부용도
-			for line in xlsx_data[1:]:	# line[0]:호수, line[1]:총면적, line[2]:전용면적, line[3]:세부용도, 4:건물명, 5:구분, 6:층
+			for line in xlsx_data[1:]:	# line[0]:호수, line[1]:총면적, line[2]:전용면적, line[3]:세부용도, 4:건물명, 5:구분, 6:층, 7:전용(평)
 				csv_size1 = int(float(line[1]))	# 현황이 없으면 이부분에서 에러남
 				if csv_size1 == int(size_total) and floor == line[0][0]:	# 총면적이 같고, 층수가 같으면
 					# print(f"size1={size1}:{floor}, csv_size1={csv_size1}:{line[1]}:{line[0]}")
 					ho = ho + line[0]	# 같은 호수가 여러개일수 있음
 					if ho is not None:	# 같은 호수가 여러개면 ,를 이용해서 나열
 						ho = ho + ","
+					# size_real = line[7]
 			if ho.endswith(","):	# 제일 끝에 , 가 있으면 삭제
 				ho = ho[:-1]
 		except:
@@ -305,6 +307,7 @@ async def tele_push(content): #텔레그램 발송용 함수
 				time.sleep(3)
 				if send_retry == 3:
 					printL(f"-- tele_push aborted!!! : chat_id = {chat_id}")
+					printL(f"-- content : {content}")
 					break
 			else:	# 정상작동시
 				pass
@@ -314,29 +317,44 @@ async def tele_push(content): #텔레그램 발송용 함수
 	global global_var
 	global_var = global_var + 1	# 보낸 메세지가 있으면 +1씩 올라감
 
-def send_lists(lists):	# 전일자와 비교해서 현재 새로운 매물리스트를 메세지로 발송
-	# print(len(lists))
-	if len(lists) == 0:	# 어제자와 비교했을때 추가된 건이 없을때
-		# print("추가 매물이 없음")
-		pass
-	else:
-		# print("lists is not None")
-		msg_content = ""
-		for list in lists:
-			if list[17] == "":
-				ho = "Not found"
+def send_lists(lands):	# 전일자와 비교해서 현재 새로운 매물리스트를 메세지로 발송
+	for land in lands:
+		try:
+			lists = land_naver(land)
+		except:	# 에러시
+			global global_err
+			global_err = global_err + 1
+			printL(f"{land} : ERROR! land_naver 결과 에러. count({global_err})")
+			continue
+		else:	# 정상완료시
+			# print(len(lists))
+			if len(lists) == 0:	# 어제자와 비교했을때 추가된 건이 없을때
+				# print("추가 매물이 없음")
+				pass
 			else:
-				ho = list[17]
-			# if msg_content is not None:
-			# 	msg_content = msg_content + "\n"
-			# tuple1 = (formatted_date, bld_id, memo, address_short, url, naver_bld_id, name, type, price, price_base, price_mon, info_area_type, info_area_spec, size_total, size_real, floor, agent_name, ho)
-			deep_link = f"https://new.land.naver.com/offices?articleNo={list[5]}"
-			# msg_content = f"{msg_content}\*{list[2]}({list[3]}): {list[6]} {list[7]}\n - {list[8]} {list[12]}\n - {list[16]}\n - 호수 : _{ho}_\n"
-			msg_content = f"{msg_content}\*[{list[2]}({list[3]})]({deep_link}): {list[6]} {list[7]}\n - {list[8]} {list[12]}\n - {list[16]}\n - 호수 : _{ho}_\n"
-		printL(msg_content)
-		global global_msg_contents
-		global_msg_contents.append(msg_content)		# 메세지를 바로 보내지 않고 global list 변수에 담아놓기
-		# asyncio.run(tele_push(msg_content)) #텔레그램 발송 (asyncio를 이용해야 함)
+				# print("lists is not None")
+				msg_content = ""
+				for list in lists:
+					if list[17] == "":
+						ho = "Not found"
+					else:
+						ho = list[17]
+					# if msg_content is not None:
+					# 	msg_content = msg_content + "\n"
+					# tuple1 = (formatted_date, bld_id, memo, address_short, url, naver_bld_id, name, type, price(8), price_base(9), price_mon(10), info_area_type(11), info_area_spec(12), size_total(13), size_real(14), floor, agent_name, ho)
+					deep_link = f"https://new.land.naver.com/offices?articleNo={list[5]}"
+					num = round(float(list[14])*0.3025, 2)
+					pyoung = f"m²({num}평)\n -"
+					list_12 = list[12].replace("m²,",pyoung)
+					# msg_content = f"{msg_content}\*{list[2]}({list[3]}): {list[6]} {list[7]}\n - {list[8]} {list[12]}\n - {list[16]}\n - 호수 : _{ho}_\n"
+					msg_content = f"{msg_content}\*[{list[2]}({list[3]})]({deep_link}): {list[6]} {list[7]}\n - {list[8]} {list_12}\n - {list[16]}\n - 호수 : _{ho}_\n"
+				printL(msg_content)
+				global global_msg_contents
+				global_msg_contents.append(msg_content)		# 메세지를 바로 보내지 않고 global list 변수에 담아놓기
+				# asyncio.run(tele_push(msg_content)) #텔레그램 발송 (asyncio를 이용해야 함)
+		finally:	# 정상,완료 상관없이 마지막에
+			pass
+
 		
 
 def initial_lists(lists):	# 건물 처음으로 추가시에 메세지는 보내지 않고 오늘 매물만 DB에 insert 하고 싶을때 사용
@@ -374,9 +392,72 @@ if flag:
 # initial_lists(land_naver('BLD2-18'))	# 로데오탑 (처음에 건물 추가할때는 이렇게 넣어야 됨)
 
 #------- 각 건물별로 실행 ----------------------
+# lands_list = ['BLD1-01']
+flag = True
+if flag:
+	lands_list = [
+		'BLD1-01',
+		'BLD1-02',
+		'BLD1-03',
+		'BLD1-04',
+		'BLD1-05',	#1차 동하넥서스
+		'BLD1-06',	#1차 성우사카르
+		'BLD1-07',	#1차
+		'BLD1-08',
+		'BLD1-09',	#1차
+		'BLD1-10',
+		'BLD1-11',	#1차
+		'BLD1-12',	#1차 77건짜리 동그라미 선택 실패 사례발생, 화면크기 키워서 해결
+		'BLD1-13',
+		'BLD1-14',
+		'BLD1-17',
+		'BLD1-18',
+		'BLD1-19',
+		'BLD1-20',
+		'BLD1-21',
+		'BLD1-23',
+		'BLD1-24',
+		'BLD1-25',
+		'BLD1-26',
+		'BLD1-27',
+		'BLD1-28',
+		'BLD1-29',
+		'BLD1-30',
+		'BLD1-31',
+		'BLD1-32',
+		'BLD1-33',
+		'BLD1-34',
+		'BLD1-36',
+		'BLD2-01',
+		'BLD2-02',	#1차
+		'BLD2-03',	#1차
+		'BLD2-04',	#1차
+		'BLD2-06',
+		'BLD2-07',
+		'BLD2-08',
+		'BLD2-09',	#1차
+		'BLD2-11',	#1차
+		'BLD2-12',	#1차 원장내용없는 사태 발생, 에러처리완료
+		'BLD2-13',	#1차
+		'BLD2-14',	#1차
+		'BLD2-15',
+		'BLD2-16',	#1차 하임빌
+		'BLD2-17',
+		'BLD2-18',	#1차 로데오탑
+		'BLD2-19',	#1차
+		'BLD2-20',	#1차
+		'BLD2-21',	#1차
+		'BLD2-22',	#1차
+		'BLD2-24',
+		'BLD2-27',
+		'BLD2-28',
+		'BLD2-29'
+	]
+send_lists(lands_list)
+
 # send_lists(land_naver('BLD1-05'))
 # send_lists(land_naver('BLD2-09'))
-flag = True
+flag = False
 if flag:
 	send_lists(land_naver('BLD1-01'))
 	send_lists(land_naver('BLD1-02'))
