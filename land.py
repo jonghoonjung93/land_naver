@@ -7,16 +7,18 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from datetime import timedelta
-from module.etc_util import printL, mode_check
+from module.etc_util import printL, mode_check, tele_push_admin
 import telegram
 import asyncio, json
 import time, datetime
 import csv
 from openpyxl import load_workbook	# 엑셀 읽기위해 추가
 import sqlite3
+import sys
 
 global_var = 0
 global_err = 0
+global_new = 0
 global_msg_contents = []
 
 """
@@ -115,7 +117,7 @@ def land_naver(building):
 	try:
 		driver.find_element(By.ID, naver_bld_id).find_element(By.CLASS_NAME, 'marker_transparent').click()	# 건물 동그라미 클릭
 	except:
-		printL("click retry...")
+		printL(f"{building} marker click retry...")
 		time.sleep(2)
 		try:
 			driver.get(url)
@@ -123,9 +125,10 @@ def land_naver(building):
 			driver.find_element(By.ID, naver_bld_id).find_element(By.CLASS_NAME, 'marker_transparent').click()	# 건물 동그라미 클릭2
 		except:
 			time.sleep(1)
-			printL("ERROR : marker click failed... return")
+			printL(f"ERROR : {building} marker click failed... return")
 			driver.quit()
-			return(new_list)
+			raise RuntimeError("RuntimeError : 건물 동그라미 클릭 실패")
+			# return(new_list)
 	# time.sleep(1000)
 
 	time.sleep(2)
@@ -168,7 +171,6 @@ def land_naver(building):
 	cursor = conn.cursor()
 
 	data_list = []	# DB에 insert 대상 매물 리스트
-	
 	
 	# for item in items:
 	# for index in range(items_len):
@@ -257,6 +259,8 @@ def land_naver(building):
 		else:	# 매물이 어제자 DB에 없는 새로운 매물일 경우
 			# print("없다. 새로운거 발견!!!!")
 			new_list.append(tuple1)
+			global global_new
+			global_new = global_new + 1
 
 	# print(new_list)
 
@@ -321,10 +325,18 @@ def send_lists(lands):	# 전일자와 비교해서 현재 새로운 매물리스
 	for land in lands:
 		try:
 			lists = land_naver(land)
-		except:	# 에러시
+		except KeyboardInterrupt:
+			printL("KeyboardInterrupt 발생. 프로그램 종료합니다.")
+			sys.exit(1)
+		except RuntimeError as e:	# 동그라미 클릭 에러시
 			global global_err
 			global_err = global_err + 1
-			printL(f"{land} : ERROR! land_naver 결과 에러. count({global_err})")
+			printL(f"{land} : ERROR! land_naver 에러 ({e}). count({global_err})")
+			continue
+		except:		# 기타 에러 발생시
+			# global global_err
+			global_err = global_err + 1
+			printL(f"{land} : ERROR! land_naver 알수없는 에러. count({global_err})")
 			continue
 		else:	# 정상완료시
 			# print(len(lists))
@@ -355,8 +367,6 @@ def send_lists(lands):	# 전일자와 비교해서 현재 새로운 매물리스
 		finally:	# 정상,완료 상관없이 마지막에
 			pass
 
-		
-
 def initial_lists(lists):	# 건물 처음으로 추가시에 메세지는 보내지 않고 오늘 매물만 DB에 insert 하고 싶을때 사용
 	msg_content = ""
 	for list in lists:
@@ -386,13 +396,10 @@ if flag:
 	printL(f"-- START : {start_time}")
 	printL(f"-- {mode_check()} MODE")
 
-# send_lists(land_naver('BLD2-19'))	# 로데오탑
-# send_lists(land_naver('BLD2-17'))	# 하임빌
-# initial_lists(land_naver('BLD2-16'))	# 하임빌	2-15부터 index number 변경됨
-# initial_lists(land_naver('BLD2-18'))	# 로데오탑 (처음에 건물 추가할때는 이렇게 넣어야 됨)
-
+# initial_lists(land_naver('BLD2-18'))	# 초기화할때 (처음에 건물 추가할때는 이렇게 넣어야 됨)
+# send_lists(land_naver('BLD2-18'))	# 변경전 예전방식
 #------- 각 건물별로 실행 ----------------------
-# lands_list = ['BLD1-01']
+# lands_list = ['BLD2-03']	# 한개씩 실행할때
 flag = True
 if flag:
 	lands_list = [
@@ -455,68 +462,6 @@ if flag:
 	]
 send_lists(lands_list)
 
-# send_lists(land_naver('BLD1-05'))
-# send_lists(land_naver('BLD2-09'))
-flag = False
-if flag:
-	send_lists(land_naver('BLD1-01'))
-	send_lists(land_naver('BLD1-02'))
-	send_lists(land_naver('BLD1-03'))
-	send_lists(land_naver('BLD1-04'))
-	send_lists(land_naver('BLD1-05'))	#1차 동하넥서스
-	send_lists(land_naver('BLD1-06'))	#1차 성우사카르
-	send_lists(land_naver('BLD1-07'))	#1차
-	send_lists(land_naver('BLD1-08'))
-	send_lists(land_naver('BLD1-09'))	#1차
-	send_lists(land_naver('BLD1-10'))
-	send_lists(land_naver('BLD1-11'))	#1차
-	send_lists(land_naver('BLD1-12'))	#1차 77건짜리 동그라미 선택 실패 사례발생, 화면크기 키워서 해결
-	send_lists(land_naver('BLD1-13'))
-	send_lists(land_naver('BLD1-14'))
-	send_lists(land_naver('BLD1-17'))
-	send_lists(land_naver('BLD1-18'))
-	send_lists(land_naver('BLD1-19'))
-	send_lists(land_naver('BLD1-20'))
-	send_lists(land_naver('BLD1-21'))
-	send_lists(land_naver('BLD1-23'))
-	send_lists(land_naver('BLD1-24'))
-	send_lists(land_naver('BLD1-25'))
-	send_lists(land_naver('BLD1-26'))
-	send_lists(land_naver('BLD1-27'))
-	send_lists(land_naver('BLD1-28'))
-	send_lists(land_naver('BLD1-29'))
-	send_lists(land_naver('BLD1-30'))
-	send_lists(land_naver('BLD1-31'))
-	send_lists(land_naver('BLD1-32'))
-	send_lists(land_naver('BLD1-33'))
-	send_lists(land_naver('BLD1-34'))
-	send_lists(land_naver('BLD1-36'))
-
-	send_lists(land_naver('BLD2-01'))
-	send_lists(land_naver('BLD2-02'))	#1차
-	send_lists(land_naver('BLD2-03'))	#1차
-	send_lists(land_naver('BLD2-04'))	#1차
-	send_lists(land_naver('BLD2-06'))
-	send_lists(land_naver('BLD2-07'))
-	send_lists(land_naver('BLD2-08'))
-	send_lists(land_naver('BLD2-09'))	#1차
-	send_lists(land_naver('BLD2-11'))	#1차
-	send_lists(land_naver('BLD2-12'))	#1차 원장내용없는 사태 발생, 에러처리완료
-	send_lists(land_naver('BLD2-13'))	#1차
-	send_lists(land_naver('BLD2-14'))	#1차
-	send_lists(land_naver('BLD2-15'))
-	send_lists(land_naver('BLD2-16'))	#1차 하임빌
-	send_lists(land_naver('BLD2-17'))
-	send_lists(land_naver('BLD2-18'))	#1차 로데오탑
-	send_lists(land_naver('BLD2-19'))	#1차
-	send_lists(land_naver('BLD2-20'))	#1차
-	send_lists(land_naver('BLD2-21'))	#1차
-	send_lists(land_naver('BLD2-22'))	#1차
-	send_lists(land_naver('BLD2-24'))
-	send_lists(land_naver('BLD2-27'))
-	send_lists(land_naver('BLD2-28'))
-	send_lists(land_naver('BLD2-29'))
-
 # printL(f"global_msg_contents({len(global_msg_contents)}) : {global_msg_contents}")
 
 #--- 모아뒀던 메세지 발송 -----
@@ -539,5 +484,12 @@ if flag:
 	current_time = datetime.datetime.now()
 	formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
 	end_time = current_time.strptime(formatted_time, "%Y-%m-%d %H:%M:%S")
+	elap_time = end_time - start_time
 	printL(f"-- END : {end_time}")
-	printL(f"-- Elapsed time : {end_time - start_time}")
+	printL(f"-- Elapsed time : {elap_time}")
+
+#--- 관리자 결과 보고 -----
+flag = True
+if flag:
+	completed_message = f"\[완료] 총건물 : {len(lands_list)}개\n - 추가된 매물/건물 : {global_new}개 / {len(global_msg_contents)}개\n - 에러처리된 건물 : {global_err}개\n - Elapsed time : {elap_time}"
+	asyncio.run(tele_push_admin(completed_message)) #텔레그램 발송 (asyncio를 이용해야 함)
