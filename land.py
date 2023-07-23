@@ -19,6 +19,7 @@ import sys
 global_var = 0
 global_err = 0
 global_new = 0
+global_zero = 0
 global_msg_contents = []
 
 """
@@ -117,7 +118,7 @@ def land_naver(building):
 	try:
 		driver.find_element(By.ID, naver_bld_id).find_element(By.CLASS_NAME, 'marker_transparent').click()	# 건물 동그라미 클릭
 	except:
-		printL(f"{building} marker click retry...")
+		printL(f"{building}({memo}) marker click retry...")
 		time.sleep(2)
 		try:
 			driver.get(url)
@@ -125,10 +126,18 @@ def land_naver(building):
 			driver.find_element(By.ID, naver_bld_id).find_element(By.CLASS_NAME, 'marker_transparent').click()	# 건물 동그라미 클릭2
 		except:
 			time.sleep(1)
-			printL(f"ERROR : {building} marker click failed... return")
-			driver.quit()
-			raise RuntimeError("RuntimeError : 건물 동그라미 클릭 실패")
-			# return(new_list)
+			printL(f"ERROR : {building}({memo}) marker click failed... return")
+			html_content = driver.page_source
+			if naver_bld_id in html_content:	# 클릭을 실패했는데 건물ID가 html 에 있는 경우 (진짜 클릭실패한 경우)
+				printL(f"naver_bld_id({naver_bld_id})가 html 안에 존재함")
+				driver.quit()
+				raise RuntimeError(f"RuntimeError :{building}({memo}) 건물 동그라미 클릭 실패")	# 에러 return
+			else:								# 클릭을 실패했는데 건물ID가 없는 경우 (해당 건물에 매물이 없어서 클릭을 못한 경우)
+				printL(f"naver_bld_id({naver_bld_id})가 html 안에 존재하지 않음, 해당 건물에 매물이 한개도 없음")
+				global global_zero
+				global_zero = global_zero + 1
+				driver.quit()
+				return(new_list)	# 정상 return
 	# time.sleep(1000)
 
 	time.sleep(2)
@@ -399,7 +408,7 @@ if flag:
 # initial_lists(land_naver('BLD2-18'))	# 초기화할때 (처음에 건물 추가할때는 이렇게 넣어야 됨)
 # send_lists(land_naver('BLD2-18'))	# 변경전 예전방식
 #------- 각 건물별로 실행 ----------------------
-# lands_list = ['BLD2-03']	# 한개씩 실행할때
+# lands_list = ['BLD2-17']	# 한개씩 실행할때
 flag = True
 if flag:
 	lands_list = [
@@ -491,5 +500,5 @@ if flag:
 #--- 관리자 결과 보고 -----
 flag = True
 if flag:
-	completed_message = f"\[완료] 총건물 : {len(lands_list)}개\n - 추가된 매물/건물 : {global_new}개 / {len(global_msg_contents)}개\n - 에러처리된 건물 : {global_err}개\n - Elapsed time : {elap_time}"
+	completed_message = f"\[완료] 총건물 : {len(lands_list)}개\n - 추가된 매물/건물 : {global_new}개 / {len(global_msg_contents)}개\n - 에러처리된 건물 : {global_err}개\n - 매물이 없는 건물 : {global_zero}개\n - Elapsed time : {elap_time}"
 	asyncio.run(tele_push_admin(completed_message)) #텔레그램 발송 (asyncio를 이용해야 함)
