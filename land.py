@@ -501,4 +501,5 @@ if flag:
 flag = True
 if flag:
 	completed_message = f"\[완료] 총건물 : {len(lands_list)}개\n - 추가된 매물/건물 : {global_new}개 / {len(global_msg_contents)}개\n - 에러처리된 건물 : {global_err}개\n - 매물이 없는 건물 : {global_zero}개\n - Elapsed time : {elap_time}"
+	printL(completed_message)
 	asyncio.run(tele_push_admin(completed_message)) #텔레그램 발송 (asyncio를 이용해야 함)
