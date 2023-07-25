@@ -17,5 +17,6 @@ logs
 csv
 xlsx
 *_202*
+*.202*
 test
 account*

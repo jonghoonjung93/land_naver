@@ -229,7 +229,11 @@ def land_naver(building):
 			var2 = ""
 			var3 = ""
 		size_total, size_real = var1.replace('m²','').split('/')	# 총면적, 전용면적 가져오기
-		floor = var2.replace(' ','')[0]
+		# floor = var2.replace(' ','')[0]
+		try:
+			floor, etc99 = var2.replace(' ','').split('/')
+		except:
+			floor = var2.replace(' ','')[0]
 		ho = ''
 		try:	# csv 파일이 헤더만 있는경우 line[1]을 못가져오고 에러나는것에 대한 처리
 			# for line in csv_data[1:]:	# line[0]:호수, line[1]:총면적, line[2]:전용면적, line[3]:세부용도
@@ -253,23 +257,27 @@ def land_naver(building):
 		except:
 			price_base = price
 			price_mon = ""
-		tuple1 = (formatted_date, bld_id, memo, address_short, url, naver_bld_id, name, type, price, price_base, price_mon, info_area_type, info_area_spec, size_total, size_real, floor, agent_name, ho)
-		# print(tuple1)
-		data_list.append(tuple1)	# tuple 을 list 에 추가
-		result = f"{name} | {type} | {price} | {info_area_type} | {info_area_spec} | {agent_name} | {ho}"
+		
 		# 해당 매물이 기존에 DB에 있는지 확인 (어제자와 비교)
 		select_sql = f"SELECT * FROM land_item WHERE date='{yesterday}' AND bld_id = '{bld_id}' AND price = '{price}' AND info_area_spec = '{info_area_spec}' AND agent_name = '{agent_name}'"
 		cursor.execute(select_sql)
 		result_select = cursor.fetchone()
 		# print(result_select)
+
 		if result_select is not None:	# 매물을 어제자 DB에서 조회했는데 이미 있던 매물일 경우
 			# print("있다")
-			pass
+			new = ""
+			tuple1 = (formatted_date, bld_id, memo, address_short, url, naver_bld_id, name, type, price, price_base, price_mon, info_area_type, info_area_spec, size_total, size_real, floor, agent_name, ho, new)
 		else:	# 매물이 어제자 DB에 없는 새로운 매물일 경우
 			# print("없다. 새로운거 발견!!!!")
+			new = "O"
+			tuple1 = (formatted_date, bld_id, memo, address_short, url, naver_bld_id, name, type, price, price_base, price_mon, info_area_type, info_area_spec, size_total, size_real, floor, agent_name, ho, new)
 			new_list.append(tuple1)
 			global global_new
 			global_new = global_new + 1
+
+		data_list.append(tuple1)	# tuple 을 list 에 추가
+		result = f"{name} | {type} | {price} | {info_area_type} | {info_area_spec} | {agent_name} | {ho}"
 
 	# print(new_list)
 
@@ -278,7 +286,7 @@ def land_naver(building):
 	cursor.execute(delete_sql1)
 	delete_sql2 = f"DELETE FROM land_item WHERE date = '{formatted_date}' AND bld_id = '{bld_id}'"	# 당일자 삭제 (이미 있을때 다시 넣기 위해서)
 	cursor.execute(delete_sql2)
-	cursor.executemany("INSERT INTO land_item (date, bld_id, memo, address, url, naver_bld_id, name, type, price, price_base, price_mon, info_area_type, info_area_spec, size_total, size_real, floor, agent_name, ho) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);", data_list)
+	cursor.executemany("INSERT INTO land_item (date, bld_id, memo, address, url, naver_bld_id, name, type, price, price_base, price_mon, info_area_type, info_area_spec, size_total, size_real, floor, agent_name, ho, new) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);", data_list)
 	conn.commit()
 	conn.close()
 
