@@ -350,10 +350,10 @@ def send_lists(lands):	# 전일자와 비교해서 현재 새로운 매물리스
 			global_err = global_err + 1
 			printL(f"{land} : ERROR! land_naver 에러 ({e}). count({global_err})")
 			continue
-		except:		# 기타 에러 발생시
+		except Exception as e:
 			# global global_err
 			global_err = global_err + 1
-			printL(f"{land} : ERROR! land_naver 알수없는 에러. count({global_err})")
+			printL(f"{land} : ERROR! land_naver 알수없는 에러. count({global_err}), err({e})")
 			continue
 		else:	# 정상완료시
 			# print(len(lists))
@@ -416,7 +416,7 @@ if flag:
 # initial_lists(land_naver('BLD2-18'))	# 초기화할때 (처음에 건물 추가할때는 이렇게 넣어야 됨)
 # send_lists(land_naver('BLD2-18'))	# 변경전 예전방식
 #------- 각 건물별로 실행 ----------------------
-# lands_list = ['BLD2-17']	# 한개씩 실행할때
+# lands_list = ['BLD2-01']	# 한개씩 실행할때
 flag = True
 if flag:
 	lands_list = [
