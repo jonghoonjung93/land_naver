@@ -29,47 +29,49 @@ except NoSuchElementException:
 """
 
 def land_naver(building):
-	options = Options()
-	
-	# global hostname
-	if mode_check() == 'TEST':
-		# options.add_argument("headless") #크롬창이 뜨지 않고 백그라운드로 동작됨
-		pass
-	else:
-		options.add_argument("headless") #크롬창이 뜨지 않고 백그라운드로 동작됨
-
-	# 아래 옵션 두줄 추가(NAS docker 에서 실행시 필요, memory 부족해서)
-	options.add_argument('--no-sandbox')
-	options.add_argument('--disable-dev-shm-usage')
-
-	# headless로 동작할때 element를 못찾으면 아래 두줄 추가 (창크기가 작아서 못찾을수 있음)
-	# options.add_argument("start-maximized")
-	# options.add_argument("window-size=1920,1080")
-	options.add_argument("window-size=1920,2160")	# 창크기가 작아서 전체 내용이 표시되지 않아서 크게 키움
-	# options.add_argument("window-size=1300,2000")	# 이 크기로는 동그라미 클릭 오류가 가끔발생
-	# options.add_argument("disable-gpu")
-	# options.add_argument("lang=ko_KR")
-
-	flag = False	# ----- TEST 환경에서 임시로 headless 사용할때만 True 로 놓고 사용 (아직 잘안됨, 해결필요) ---------------
-	if flag:
-		options.add_argument('headless')
-
-	# 아래는 headless 크롤링을 막아놓은곳에 필요 (user agent에 HeadlessChrome 이 표시되는걸 방지)
-	options.add_argument('user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36')
+	flag = True
+	if flag:	# 환경설정 부분
+		options = Options()
 		
-    # config.json 파일처리 ----------------
-	with open('config.json','r') as f:
-		config = json.load(f)
-	url = config[building]['URL']
-	naver_bld_id = config[building]['NAVER_BLD_ID']
-	address = config[building]['ADDRESS']
-	memo = config[building]['MEMO']
-	# ------------------------------------
+		# global hostname
+		if mode_check() == 'TEST':
+			# options.add_argument("headless") #크롬창이 뜨지 않고 백그라운드로 동작됨
+			pass
+		else:
+			options.add_argument("headless") #크롬창이 뜨지 않고 백그라운드로 동작됨
 
-	driver = webdriver.Chrome(options=options)
+		# 아래 옵션 두줄 추가(NAS docker 에서 실행시 필요, memory 부족해서)
+		options.add_argument('--no-sandbox')
+		options.add_argument('--disable-dev-shm-usage')
+
+		# headless로 동작할때 element를 못찾으면 아래 두줄 추가 (창크기가 작아서 못찾을수 있음)
+		# options.add_argument("start-maximized")
+		# options.add_argument("window-size=1920,1080")
+		options.add_argument("window-size=1920,2160")	# 창크기가 작아서 전체 내용이 표시되지 않아서 크게 키움
+		# options.add_argument("window-size=1300,2000")	# 이 크기로는 동그라미 클릭 오류가 가끔발생
+		# options.add_argument("disable-gpu")
+		# options.add_argument("lang=ko_KR")
+
+		flag = False	# ----- TEST 환경에서 임시로 headless 사용할때만 True 로 놓고 사용 (아직 잘안됨, 해결필요) ---------------
+		if flag:
+			options.add_argument('headless')
+
+		# 아래는 headless 크롤링을 막아놓은곳에 필요 (user agent에 HeadlessChrome 이 표시되는걸 방지)
+		options.add_argument('user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36')
+			
+		# config.json 파일처리 ----------------
+		with open('config.json','r') as f:
+			config = json.load(f)
+		url = config[building]['URL']
+		naver_bld_id = config[building]['NAVER_BLD_ID']
+		address = config[building]['ADDRESS']
+		memo = config[building]['MEMO']
+		# ------------------------------------
+
+		driver = webdriver.Chrome(options=options)
 
     # 건물정보 csv 파일처리 ----------------
-	flag = False	# 엑셀방식으로 전환했음
+	flag = False	# 엑셀방식으로 전환했음. 지금은 사용안함
 	if flag:
 		csv_data = []
 		address_short = address.replace("고양시 일산동구 ","")
@@ -82,7 +84,7 @@ def land_naver(building):
 		# 	print(line[1])
 	# ------------------------------------
 
-	# 건물정보 excel 파일처리 ----------------------------
+	# 건물정보 excel 파일을 읽어서 list 변수에 넣기 ----------------------------
 	flag = True
 	if flag:
 		xlsx_data = []
@@ -95,6 +97,10 @@ def land_naver(building):
 			cell1 = ws.cell(row=x, column=1).value
 			cell2 = ws.cell(row=x, column=2).value
 			cell3 = ws.cell(row=x, column=3).value
+			if cell3 != None:	# 층 컬럼에 값이 있을때
+				cell3_convert = cell3.replace("층","").replace("F","")	# 층 컬럼에
+			else:	# 층 컬럼에 값이 없을때 (값이 없을때 replace 함수를 쓰면 Nontype 에러남)
+				cell3_convert = cell3
 			cell4 = ws.cell(row=x, column=4).value
 			cell5 = ws.cell(row=x, column=5).value
 			cell6 = ws.cell(row=x, column=6).value
@@ -103,9 +109,9 @@ def land_naver(building):
 			cell9 = ws.cell(row=x, column=9).value
 			# cell10 = ws.cell(row=x, column=10).value
 			#             호수,  총면적,  전용면적, 용도,  건물명,  구분,   층 ,   전용(평)
-			temp_list = [cell4, cell5, cell6, cell9, cell1, cell2, cell3, cell8]
+			temp_list = [cell4, cell5, cell6, cell9, cell1, cell2, cell3_convert, cell8]
 			xlsx_data.append(temp_list)
-	# -----------------------------------------------
+	# ------------------------------------------------------------------
 
 
 	# 페이지 접속
@@ -188,7 +194,7 @@ def land_naver(building):
 		# item = driver.find_element(By.CLASS_NAME, 'item_list.item_list--article').find_elements(By.CLASS_NAME, 'item.false')[index]
 		name = item.find_element(By.CLASS_NAME, 'text').text
 		# printL(name)
-		# --- 매물번호 가져오기 (item_number) ----------------------------------------------------------------- #
+		# --- 매물번호 가져오기 (item_number) 매물을 하나하나 클릭해서 변경된 URL에서 값을 가져옴 ------------------------- #
 		try:	# "네이버에서 보기" 버튼이 있는 경우
 			naver_view = item.find_element(By.CLASS_NAME, 'label.label--cp')
 			# printL(f"naver_view : {naver_view.text}")
@@ -239,7 +245,8 @@ def land_naver(building):
 			# for line in csv_data[1:]:	# line[0]:호수, line[1]:총면적, line[2]:전용면적, line[3]:세부용도
 			for line in xlsx_data[1:]:	# line[0]:호수, line[1]:총면적, line[2]:전용면적, line[3]:세부용도, 4:건물명, 5:구분, 6:층, 7:전용(평)
 				csv_size1 = int(float(line[1]))	# 현황이 없으면 이부분에서 에러남
-				if csv_size1 == int(size_total) and floor == line[0][0]:	# 총면적이 같고, 층수가 같으면
+				# if csv_size1 == int(size_total) and floor == line[0][0]:	# 총면적이 같고, 층수가 같으면 -> 호수의 앞자리만 봤더니 1층 찾는데 10층까지 딸려옴
+				if csv_size1 == int(size_total) and floor == line[6]:	# 총면적이 같고, 층수가 같으면 (엑셀의 별도 호수 컬럼 이용)
 					# print(f"size1={size1}:{floor}, csv_size1={csv_size1}:{line[1]}:{line[0]}")
 					ho = ho + line[0]	# 같은 호수가 여러개일수 있음
 					if ho is not None:	# 같은 호수가 여러개면 ,를 이용해서 나열
@@ -416,7 +423,7 @@ if flag:
 # initial_lists(land_naver('BLD2-18'))	# 초기화할때 (처음에 건물 추가할때는 이렇게 넣어야 됨)
 # send_lists(land_naver('BLD2-18'))	# 변경전 예전방식
 #------- 각 건물별로 실행 ----------------------
-# lands_list = ['BLD2-01']	# 한개씩 실행할때
+# lands_list = ['BLD1-31']	# 한개씩 실행할때
 flag = True
 if flag:
 	lands_list = [
@@ -483,17 +490,20 @@ send_lists(lands_list)
 
 #--- 모아뒀던 메세지 발송 -----
 flag = True
+flag_sms = True	# 메세지 발송여부 (관리자 메세지 포함)
 if flag:
 	# if global_var == 0:	# 전체적으로 보낼 메세지가 1건도 없을때
 	if len(global_msg_contents) == 0:	# 보낼 메세지 list 변수안에 1건도 없을때
 		if global_var == 0:		# 초기화 작업만 했을때는 메세지는 없지만 global_var는 0 이 아님
 			msg_content = " - 새로운 매물이 없음"
 			printL(msg_content)
-			asyncio.run(tele_push(msg_content)) #텔레그램 발송 (asyncio를 이용해야 함)
-	else:	# 보낼 메세지가 있을때
+			if flag_sms:
+				asyncio.run(tele_push(msg_content)) #텔레그램 발송 (asyncio를 이용해야 함)
+	else:	# 보낼 메세지가 있을때 (list 에 있는 내용 다 보냄)
 		printL(f"global_msg_contents ({len(global_msg_contents)})개")
 		for msg in global_msg_contents:
-			asyncio.run(tele_push(msg)) #텔레그램 발송 (asyncio를 이용해야 함)
+			if flag_sms:
+				asyncio.run(tele_push(msg)) #텔레그램 발송 (asyncio를 이용해야 함)
 
 #--- End Time 기록 -----
 flag = True
@@ -510,4 +520,5 @@ flag = True
 if flag:
 	completed_message = f"\[완료] 총건물 : {len(lands_list)}개\n - 추가된 매물/건물 : {global_new}개 / {len(global_msg_contents)}개\n - 에러처리된 건물 : {global_err}개\n - 매물이 없는 건물 : {global_zero}개\n - Elapsed time : {elap_time}"
 	printL(completed_message)
-	asyncio.run(tele_push_admin(completed_message)) #텔레그램 발송 (asyncio를 이용해야 함)
+	if flag_sms:
+		asyncio.run(tele_push_admin(completed_message)) #텔레그램 발송 (asyncio를 이용해야 함)
