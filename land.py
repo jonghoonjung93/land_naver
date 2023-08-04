@@ -22,6 +22,7 @@ global_new = 0
 global_zero = 0
 global_msg_contents = []
 
+
 """
 from selenium.common.exceptions import NoSuchElementException
 try:
