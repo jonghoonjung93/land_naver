@@ -318,6 +318,9 @@ async def tele_push(content): #텔레그램 발송용 함수
 
 	current_time = datetime.datetime.now()
 	# formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
+
+	result = [0, 0, 0, 0]	# 대상자, 성공, 재시도, 실패 건수
+	result[0] = len(chat_ids)
 	bot = telegram.Bot(token = token)
 
 	# 실패시 재시도를 여기서 하도록 변경
@@ -329,20 +332,24 @@ async def tele_push(content): #텔레그램 발송용 함수
 				# await bot.send_message(chat_id, formatted_time + "\n" + content, parse_mode = 'Markdown', disable_web_page_preview=True)
 				await bot.send_message(chat_id, content, parse_mode = 'Markdown', disable_web_page_preview=True)
 				printL(f"-- SEND success!!! : {chat_id}")
+				result[1] = result[1] + 1	# 성공
 				break
 			except:
 				send_retry = send_retry + 1
+				result[2] = result[2] + 1	# 재시도
 				printL(f"-- tele_push failed!!! ({send_retry}) : chat_id = {chat_id}")
 				time.sleep(3)
 				if send_retry == 3:
 					printL(f"-- tele_push aborted!!! : chat_id = {chat_id}")
+					result[3] = result[3] + 1	# 실패
 					printL(f"-- content : {content}")
 					break
 			else:	# 정상작동시
 				pass
 			finally:	# 마지막에 (정상,에러 상관없이)
 				pass
-	printL("-------------------------------------")
+		printL("-------------------------------------")
+	return(result)
 
 	global global_var
 	global_var = global_var + 1	# 보낸 메세지가 있으면 +1씩 올라감
@@ -425,7 +432,7 @@ if flag:
 # initial_lists(land_naver('BLD2-18'))	# 초기화할때 (처음에 건물 추가할때는 이렇게 넣어야 됨)
 # send_lists(land_naver('BLD2-18'))	# 변경전 예전방식
 #------- 각 건물별로 실행 ----------------------
-# lands_list = ['BLD1-31']	# 한개씩 실행할때
+# lands_list = ['BLD1-12']	# 한개씩 실행할때
 flag = True
 if flag:
 	lands_list = [
@@ -503,9 +510,15 @@ if flag:
 				asyncio.run(tele_push(msg_content)) #텔레그램 발송 (asyncio를 이용해야 함)
 	else:	# 보낼 메세지가 있을때 (list 에 있는 내용 다 보냄)
 		printL(f"global_msg_contents ({len(global_msg_contents)})개")
+		tele_result_sum = [0, 0, 0, 0]
 		for msg in global_msg_contents:
 			if flag_sms:
-				asyncio.run(tele_push(msg)) #텔레그램 발송 (asyncio를 이용해야 함)
+				tele_result = asyncio.run(tele_push(msg)) #텔레그램 발송 (asyncio를 이용해야 함)
+				tele_result_sum[0] = tele_result[0]	#발송 대상자
+				for i in range(1,4):	# 발송상태 (정상,재시도,실패)건수
+					tele_result_sum[i] = tele_result_sum[i] + tele_result[i]
+		printL(f"--- telegram 메세지 발송 결과(성공,실패) : {tele_result_sum}")
+
 
 #--- End Time 기록 -----
 flag = True
@@ -520,7 +533,15 @@ if flag:
 #--- 관리자 결과 보고 -----
 flag = True
 if flag:
-	completed_message = f"\[완료] 총건물 : {len(lands_list)}개\n - 추가된 매물/건물 : {global_new}개 / {len(global_msg_contents)}개\n - 에러처리된 건물 : {global_err}개\n - 매물이 없는 건물 : {global_zero}개\n - Elapsed time : {elap_time}"
+	# completed_message = f"\[완료] 총건물 : {len(lands_list)}개\n - 추가된 매물/건물 : {global_new}개 / {len(global_msg_contents)}개\n - 에러처리된 건물 : {global_err}개\n - 매물이 없는 건물 : {global_zero}개\n - Elapsed time : {elap_time}"
+	completed_message = (
+		f"\[완료] 총건물 : {len(lands_list)}개\n"
+		f" - 추가된 매물/건물 : {global_new}개 / {len(global_msg_contents)}개\n"
+		f" - 에러처리된 건물 : {global_err}개\n"
+		f" - 매물이 없는 건물 : {global_zero}개\n"
+		f" - 발송 결과: {tele_result_sum}\n"
+		f" - Elapsed time : {elap_time}"
+	)
 	printL(completed_message)
 	if flag_sms:
 		asyncio.run(tele_push_admin(completed_message)) #텔레그램 발송 (asyncio를 이용해야 함)
