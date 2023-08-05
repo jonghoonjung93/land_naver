@@ -317,7 +317,7 @@ async def tele_push(content): #텔레그램 발송용 함수
 	# ------------------------------------
 
 	current_time = datetime.datetime.now()
-	formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
+	# formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
 	bot = telegram.Bot(token = token)
 
 	# 실패시 재시도를 여기서 하도록 변경
@@ -342,6 +342,7 @@ async def tele_push(content): #텔레그램 발송용 함수
 				pass
 			finally:	# 마지막에 (정상,에러 상관없이)
 				pass
+	printL("-------------------------------------")
 
 	global global_var
 	global_var = global_var + 1	# 보낸 메세지가 있으면 +1씩 올라감
