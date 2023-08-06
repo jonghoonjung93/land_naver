@@ -348,7 +348,7 @@ async def tele_push(content): #텔레그램 발송용 함수
 				pass
 			finally:	# 마지막에 (정상,에러 상관없이)
 				pass
-		printL("-------------------------------------")
+	printL("-------------------------------------")
 	return(result)
 
 	global global_var
