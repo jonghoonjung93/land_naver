@@ -432,7 +432,6 @@ if flag:
 # initial_lists(land_naver('BLD2-18'))	# 초기화할때 (처음에 건물 추가할때는 이렇게 넣어야 됨)
 # send_lists(land_naver('BLD2-18'))	# 변경전 예전방식
 #------- 각 건물별로 실행 ----------------------
-# lands_list = ['BLD1-12']	# 한개씩 실행할때
 flag = True
 if flag:
 	lands_list = [
@@ -493,6 +492,8 @@ if flag:
 		'BLD2-28',
 		'BLD2-29'
 	]
+
+# lands_list = ['BLD1-12']	# 한개씩 실행할때
 send_lists(lands_list)
 
 # printL(f"global_msg_contents({len(global_msg_contents)}) : {global_msg_contents}")
@@ -501,16 +502,20 @@ send_lists(lands_list)
 flag = True
 flag_sms = True	# 메세지 발송여부 (관리자 메세지 포함)
 if flag:
+	tele_result_sum = [0, 0, 0, 0]
 	# if global_var == 0:	# 전체적으로 보낼 메세지가 1건도 없을때
 	if len(global_msg_contents) == 0:	# 보낼 메세지 list 변수안에 1건도 없을때
 		if global_var == 0:		# 초기화 작업만 했을때는 메세지는 없지만 global_var는 0 이 아님
 			msg_content = " - 새로운 매물이 없음"
 			printL(msg_content)
 			if flag_sms:
-				asyncio.run(tele_push(msg_content)) #텔레그램 발송 (asyncio를 이용해야 함)
+				tele_result = asyncio.run(tele_push(msg_content)) #텔레그램 발송 (asyncio를 이용해야 함)
+				tele_result_sum[0] = tele_result[0]	#발송 대상자
+				for i in range(1,4):	# 발송상태 (정상,재시도,실패)건수
+					tele_result_sum[i] = tele_result_sum[i] + tele_result[i]
+			printL(f"--- telegram 메세지 발송 결과(성공,실패) : {tele_result_sum}")
 	else:	# 보낼 메세지가 있을때 (list 에 있는 내용 다 보냄)
 		printL(f"global_msg_contents ({len(global_msg_contents)})개")
-		tele_result_sum = [0, 0, 0, 0]
 		for msg in global_msg_contents:
 			if flag_sms:
 				tele_result = asyncio.run(tele_push(msg)) #텔레그램 발송 (asyncio를 이용해야 함)
@@ -539,7 +544,7 @@ if flag:
 		f" - 추가된 매물/건물 : {global_new}개 / {len(global_msg_contents)}개\n"
 		f" - 에러처리된 건물 : {global_err}개\n"
 		f" - 매물이 없는 건물 : {global_zero}개\n"
-		f" - 발송 결과: {tele_result_sum}\n"
+		f" - 발송 결과: [{tele_result_sum}]\n"
 		f" - Elapsed time : {elap_time}"
 	)
 	printL(completed_message)
