@@ -531,7 +531,7 @@ if flag:
 	delete_day_form = today - timedelta(days=5)	# 삭제대상, 5일전 데이터는 삭제처리
 	delete_day = delete_day_form.strftime("%Y%m%d")
 
-	delete_day_sql = f"DELETE FROM message_list WHERE date = '{delete_day}'"	# 그저께 데이터 삭제
+	delete_day_sql = f"DELETE FROM message_list WHERE date = '{delete_day}'"	# 삭제대상(과거) 데이터 삭제
 	cursor.execute(delete_day_sql)
 	today_delete_message_list_sql = f"DELETE FROM message_list WHERE date = '{formatted_date}' AND send_yn = '0'"	# 당일자 삭제 (이미 있을때 다시 넣기 위해서)
 	cursor.execute(today_delete_message_list_sql)

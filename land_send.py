@@ -5,6 +5,8 @@ import asyncio, json
 import time, datetime
 import sqlite3
 
+#------ 당일 발송대상 메세지를 TELEGRAM으로 발송하는 프로그램 ------------#
+
 # telegram 메세지 발송함수
 async def land_tele_push(content, token, chat_id): #텔레그램 발송용 함수
     result = [1, 0, 0, 0]	# 대상자, 성공, 재시도, 실패 건수
@@ -35,7 +37,7 @@ async def land_tele_push(content, token, chat_id): #텔레그램 발송용 함�
     # printL("-------------------------------------")
     return(result)
 
-def main():
+def main():     # 테이블에서 대상 조회하고 발송하는 MAIN
     # Connect to the SQLite database
     db_connection = sqlite3.connect('land_naver.sqlite3')  # Replace 'your_database.db' with your actual database file name
     cursor = db_connection.cursor()
