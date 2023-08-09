@@ -486,7 +486,7 @@ if flag:
 		'BLD2-29'
 	]
 
-# lands_list = ['BLD2-27']	# 한개씩 실행할때
+# lands_list = ['BLD2-27','BLD2-24']	# 한개씩 실행할때
 send_lists(lands_list)
 
 # printL(f"global_msg_contents({len(global_msg_contents)}) : {global_msg_contents}")
@@ -516,7 +516,6 @@ if flag:
 				for i in range(1,4):	# 발송상태 (정상,재시도,실패)건수
 					tele_result_sum[i] = tele_result_sum[i] + tele_result[i]
 		printL(f"--- telegram 메세지 발송 결과(성공,실패) : {tele_result_sum}")
-
 
 #--- DB 접속 및 당일발송 대상 초기화 -----------
 flag = True
@@ -550,10 +549,12 @@ def db_insert(msg):
 	token = config[telegram_target]['TOKEN']
 	chat_ids = config[telegram_target]['CHAT-ID']
 	# ------------------------------------
+	
 	db_result = [0, 0, 0, 0]
 	insert_list = []
 	for chat_id in chat_ids:
 		# insert
+		# id 컬럼 = sequence 컬럼
 		time = "0900"
 		datetime_1 = ""
 		job = "land_fetch.py"
@@ -567,11 +568,11 @@ def db_insert(msg):
 		parse_mode = "Markdown"
 		preview = "Yes"
 		etc1 = etc2 = etc3 = etc4 = ""
-		row_tuple = (formatted_date, time, datetime_1, job, send_yn, retry, result, channel, chat_room, chat_id, message, parse_mode, preview, etc1, etc2, etc3, etc4)
+		row_tuple = (None, formatted_date, time, datetime_1, job, send_yn, retry, result, channel, chat_room, chat_id, message, parse_mode, preview, etc1, etc2, etc3, etc4)
 		insert_list.append(row_tuple)
 	try:
 		# db insert
-		cursor.executemany("INSERT INTO message_list (date, time, datetime, job, send_yn, retry, result, channel, chat_room, chat_id, message, parse_mode, preview, etc1, etc2, etc3, etc4) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);", insert_list)
+		cursor.executemany("INSERT INTO message_list (id, date, time, datetime, job, send_yn, retry, result, channel, chat_room, chat_id, message, parse_mode, preview, etc1, etc2, etc3, etc4) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);", insert_list)
 		db_result[0] = len(chat_ids)	# 대상자수
 		db_result[1] = db_result[1] + len(insert_list)	# 대상건수
 	except:
