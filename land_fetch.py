@@ -631,8 +631,8 @@ if flag:
 		f" - 추가된 매물/건물 : {global_new}개 / {len(global_msg_contents)}개\n"
 		f" - 에러처리된 건물 : {global_err}개\n"
 		f" - 매물이 없는 건물 : {global_zero}개\n"
-		f" - 발송대기 : [{tele_result_sum}]\n"
-		f" - DB확인 : {row_count}개\n"
+		f" - 발송대기 : {tele_result_sum[0]}명, {tele_result_sum[1]}건\n"
+		f" - DB확인 : {row_count} rows\n"
 		f" - Elapsed time : {elap_time}"
 	)
 	printL(completed_message)
