@@ -628,7 +628,7 @@ if flag:
 
 	# completed_message = f"\[완료] 총건물 : {len(lands_list)}개\n - 추가된 매물/건물 : {global_new}개 / {len(global_msg_contents)}개\n - 에러처리된 건물 : {global_err}개\n - 매물이 없는 건물 : {global_zero}개\n - Elapsed time : {elap_time}"
 	completed_message = (
-		f"\[fetch 완료] 총건물 : {len(lands_list)}개\n"
+		f"\[FETCH 완료] 총건물 : {len(lands_list)}개\n"
 		f" - 추가된 매물/건물 : {global_new}개 / {len(global_msg_contents)}개\n"
 		f" - 에러처리된 건물 : {global_err}개\n"
 		f" - 매물이 없는 건물 : {global_zero}개\n"

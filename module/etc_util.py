@@ -59,13 +59,13 @@ async def tele_push_admin(content): #텔레그램 발송용 함수
 				await bot.send_message(chat_id, content, parse_mode = 'Markdown', disable_web_page_preview=True)
 				printL(f"-- SEND(admin) success!!! : {chat_id}")
 				break
-			except:
+			except Exception as e:
 				send_retry = send_retry + 1
-				printL(f"-- tele_push(admin) failed!!! ({send_retry}) : chat_id = {chat_id}")
+				printL(f"-- tele_push(admin) failed!!! ({send_retry}) : chat_id = {chat_id} error={e}")
 				time.sleep(3)
 				if send_retry == 3:
 					printL(f"-- tele_push(admin) aborted!!! : chat_id = {chat_id}")
-					printL(f"-- content(admin) : {content}")
+					printL(f"-- content(admin) : {chat_id} {token}\n {content}")
 					break
 			else:	# 정상작동시
 				pass
