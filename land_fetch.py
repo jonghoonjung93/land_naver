@@ -279,9 +279,9 @@ def land_naver(building):
 	# print(new_list)
 
     # DB insert 처리
-	delete_sql1 = f"DELETE FROM land_item WHERE date <= '{delete_day}' AND bld_id = '{bld_id}'"	# 삭제대상 과거 데이터 삭제 (delete_day포함 과거 모두)
+	delete_sql1 = f"DELETE FROM land_item WHERE date <= '{delete_day}' AND bld_id = '{building}'"	# 삭제대상 과거 데이터 삭제 (delete_day포함 과거 모두)
 	cursor.execute(delete_sql1)
-	delete_sql2 = f"DELETE FROM land_item WHERE date = '{formatted_date}' AND bld_id = '{bld_id}'"	# 당일자 삭제 (이미 있을때 다시 넣기 위해서, 재실행을 가능하게 하기 위함)
+	delete_sql2 = f"DELETE FROM land_item WHERE date = '{formatted_date}' AND bld_id = '{building}'"	# 당일자 삭제 (이미 있을때 다시 넣기 위해서, 재실행을 가능하게 하기 위함)
 	cursor.execute(delete_sql2)
 	cursor.executemany("INSERT INTO land_item (date, bld_id, memo, address, url, naver_bld_id, name, type, price, price_base, price_mon, info_area_type, info_area_spec, size_total, size_real, floor, agent_name, ho, new) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);", data_list)
 	conn.commit()
@@ -481,7 +481,7 @@ if flag:
 		'BLD2-29'
 	]
 
-# lands_list = ['BLD2-27','BLD2-24']	# 한개씩 실행할때
+# lands_list = ['BLD1-20']	# 한개씩 실행할때
 send_lists(lands_list)
 
 # printL(f"global_msg_contents({len(global_msg_contents)}) : {global_msg_contents}")
