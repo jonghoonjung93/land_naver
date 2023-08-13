@@ -46,7 +46,25 @@ def main():     # 테이블에서 대상 조회하고 발송하는 MAIN
     current_time = datetime.datetime.now()
     formatted_date = current_time.strftime("%Y%m%d")
     
+    # 과거일자 yyyymmdd 로 만들기
+    today = current_time.date()
+    delete_day_form = today - timedelta(days=5)	# 삭제대상, 3일전 데이터는 삭제처리
+    delete_day = delete_day_form.strftime("%Y%m%d")
+    
     flag_sms = True
+
+    flag = True
+    if flag:    # 과거 데이터 삭제(정리)
+        try:
+            cursor.execute(f'SELECT count(*) FROM message_list WHERE date <= {delete_day}')
+            printL(f"-- 삭제대상 건수(before) : {cursor.fetchall()[0][0]}")
+            cursor.execute(f'DELETE FROM message_list WHERE date <= "{delete_day}"')  # 삭제대상 과거 데이터 삭제 (delete_day포함 과거 모두)
+            printL(f'-- DELETE : {delete_day} 이전 데이터 삭제처리 완료')
+            cursor.execute(f'SELECT count(*) FROM message_list WHERE date <= {delete_day}')
+            printL(f"-- 삭제대상 건수(after) : {cursor.fetchall()[0][0]}")
+            db_connection.commit()
+        except sqlite3.Error as e:
+            printL(f"DELETE : An error occurred: {e}")
 
     flag = True
     if flag:    # DB 읽어서 SEND 처리
@@ -82,7 +100,7 @@ def main():     # 테이블에서 대상 조회하고 발송하는 MAIN
                     db_connection.commit()  # Commit the changes
                 # print("-" * 20)  # Print a separator between rows
         except sqlite3.Error as e:
-            printL(f"An error occurred: {e}")
+            printL(f"SEND : An error occurred: {e}")
         finally:
             # Close the database connection
             # db_connection.close()
