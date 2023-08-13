@@ -126,7 +126,7 @@ def land_naver(building):
 			driver.find_element(By.ID, naver_bld_id).find_element(By.CLASS_NAME, 'marker_transparent').click()	# 건물 동그라미 클릭2
 		except:
 			time.sleep(1)
-			printL(f"ERROR : {building}({memo}) marker click failed... return")
+			printL(f"WARNING : {building}({memo}) marker click failed... return")
 			html_content = driver.page_source
 			if naver_bld_id in html_content:	# 클릭을 실패했는데 건물ID가 html 에 있는 경우 (진짜 클릭실패한 경우)
 				printL(f"naver_bld_id({naver_bld_id})가 html 안에 존재함")
@@ -138,7 +138,6 @@ def land_naver(building):
 				global_zero = global_zero + 1
 				driver.quit()
 				return(new_list)	# 정상 return
-	# time.sleep(1000)
 
 	time.sleep(2)
 
@@ -160,9 +159,7 @@ def land_naver(building):
 
 	# 매물 가져오기
 	items = driver.find_element(By.CLASS_NAME, 'item_list.item_list--article').find_elements(By.CLASS_NAME, 'item.false')
-	# items_len = len(driver.find_element(By.CLASS_NAME, 'item_list.item_list--article').find_elements(By.CLASS_NAME, 'item.false'))
 	printL(f"building :  {building}({memo}), {len(items)}")	# 매물 개수 확인
-	# printL(f"building :  {building}({memo}), {items_len}")	# 매물 개수 확인
 
 	# 날짜 (오늘)
 	current_time = datetime.datetime.now()
@@ -171,7 +168,6 @@ def land_naver(building):
 	today = current_time.date()
 	yesterday_form = today - timedelta(days=1)
 	yesterday = yesterday_form.strftime("%Y%m%d")
-	# delete_day_form = today - timedelta(days=2)	# 삭제대상, 2일전 데이터는 삭제처리
 	delete_day_form = today - timedelta(days=3)	# 삭제대상, 3일전 데이터는 삭제처리
 	delete_day = delete_day_form.strftime("%Y%m%d")
 
@@ -270,7 +266,7 @@ def land_naver(building):
 			new = ""
 			tuple1 = (formatted_date, bld_id, memo, address_short, url, naver_bld_id, name, type, price, price_base, price_mon, info_area_type, info_area_spec, size_total, size_real, floor, agent_name, ho, new)
 		else:	# 매물이 어제자 DB에 없는 새로운 매물일 경우
-			# print("없다. 새로운거 발견!!!!")
+			# print("없음. 새로운 매물!!!!")
 			new = "O"
 			tuple1 = (formatted_date, bld_id, memo, address_short, url, naver_bld_id, name, type, price, price_base, price_mon, info_area_type, info_area_spec, size_total, size_real, floor, agent_name, ho, new)
 			new_list.append(tuple1)
@@ -283,15 +279,14 @@ def land_naver(building):
 	# print(new_list)
 
     # DB insert 처리
-	delete_sql1 = f"DELETE FROM land_item WHERE date = '{delete_day}' AND bld_id = '{bld_id}'"	# 그저께 데이터 삭제
+	delete_sql1 = f"DELETE FROM land_item WHERE date <= '{delete_day}' AND bld_id = '{bld_id}'"	# 삭제대상 과거 데이터 삭제 (delete_day포함 과거 모두)
 	cursor.execute(delete_sql1)
-	delete_sql2 = f"DELETE FROM land_item WHERE date = '{formatted_date}' AND bld_id = '{bld_id}'"	# 당일자 삭제 (이미 있을때 다시 넣기 위해서)
+	delete_sql2 = f"DELETE FROM land_item WHERE date = '{formatted_date}' AND bld_id = '{bld_id}'"	# 당일자 삭제 (이미 있을때 다시 넣기 위해서, 재실행을 가능하게 하기 위함)
 	cursor.execute(delete_sql2)
 	cursor.executemany("INSERT INTO land_item (date, bld_id, memo, address, url, naver_bld_id, name, type, price, price_base, price_mon, info_area_type, info_area_spec, size_total, size_real, floor, agent_name, ho, new) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);", data_list)
 	conn.commit()
 	conn.close()
 
-	# time.sleep(1000)
 	driver.quit()
 	return(new_list)
 
