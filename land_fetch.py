@@ -118,7 +118,7 @@ def land_naver(building):
 	try:
 		driver.find_element(By.ID, naver_bld_id).find_element(By.CLASS_NAME, 'marker_transparent').click()	# 건물 동그라미 클릭
 	except:
-		printL(f"{building}({memo}) marker click retry...")
+		printL(f"[WARNING] {building}({memo}) marker click retry...")
 		time.sleep(2)
 		try:
 			driver.get(url)
@@ -126,14 +126,14 @@ def land_naver(building):
 			driver.find_element(By.ID, naver_bld_id).find_element(By.CLASS_NAME, 'marker_transparent').click()	# 건물 동그라미 클릭2
 		except:
 			time.sleep(1)
-			printL(f"WARNING : {building}({memo}) marker click failed... return")
+			printL(f"[WARNING] {building}({memo}) marker click failed... return")
 			html_content = driver.page_source
 			if naver_bld_id in html_content:	# 클릭을 실패했는데 건물ID가 html 에 있는 경우 (진짜 클릭실패한 경우)
-				printL(f"naver_bld_id({naver_bld_id})가 html 안에 존재함")
+				printL(f"[WARNING] naver_bld_id({naver_bld_id})가 html 안에 존재함")
 				driver.quit()
 				raise RuntimeError(f"RuntimeError :{building}({memo}) 건물 동그라미 클릭 실패")	# 에러 return
 			else:								# 클릭을 실패했는데 건물ID가 없는 경우 (해당 건물에 매물이 없어서 클릭을 못한 경우)
-				printL(f"naver_bld_id({naver_bld_id})가 html 안에 존재하지 않음, 해당 건물에 매물이 한개도 없음")
+				printL(f"[WARNING] naver_bld_id({naver_bld_id})가 html 안에 없음, 매물이 없음. (정상)")
 				global global_zero
 				global_zero = global_zero + 1
 				driver.quit()
