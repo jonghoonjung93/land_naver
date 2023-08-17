@@ -6,11 +6,13 @@ __pycache__
 *.log
 *.err
 *.sqlite3
+*.sql
+*.sh
 .DS*
+test
 tmp
 node_modules
 telegram
-run.sh
 data
 bak
 logs
@@ -18,5 +20,3 @@ csv
 xlsx
 *_202*
 *.202*
-test
-account*
