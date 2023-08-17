@@ -81,5 +81,11 @@ def require_login():
     if request.endpoint not in allowed_routes and 'userid' not in session:
         return redirect(url_for('index'))
 
+@app.before_request
+def log_request_info():
+    #app.logger.debug(request.remote_addr)
+    app.logger.debug(session.get('userid'))
+    #app.logger.debug("Headers: %s", request.headers)
+
 if __name__ == '__main__':
     app.run(debug=True)
