@@ -85,6 +85,8 @@ def require_login():
 def log_request_info():
     #app.logger.debug(request.remote_addr)
     app.logger.debug(session.get('userid'))
+    #app.logger.debug(request.headers.get('X-Forwarded-For'))
+    #app.logger.debug(request.environ.get('HTTP_X_REAL_IP', request.remote_addr))
     #app.logger.debug("Headers: %s", request.headers)
 
 if __name__ == '__main__':
