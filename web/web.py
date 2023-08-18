@@ -29,7 +29,7 @@ def query_database(query):
 
 @app.route('/')
 def index():
-    return render_template('login2.html')
+    return render_template('login3.html')
 
 @app.route('/login', methods=['POST'])
 def login():

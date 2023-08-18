@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Login Page</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+    <style>
+      body {
+        /* background-image: url("https://cdn.pixabay.com/photo/2016/11/29/03/53/house-1867187_1280.jpg"); */
+        /* background-image: url("https://cdn.pixabay.com/photo/2018/01/26/08/37/architecture-3108075_1280.jpg"); */
+        /* background-image: url("https://cdn.pixabay.com/photo/2016/04/25/23/30/house-1353389_1280.jpg"); */
+        /* background-image: url("https://cdn.pixabay.com/photo/2022/10/03/23/41/house-7497001_1280.png"); */
+        background-image: url("https://cdn.pixabay.com/photo/2022/01/11/17/04/city-6931092_1280.jpg");
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+      }
+      .card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.1);
+      }
+      .card-header {
+        background-color: #5da341;
+        color: white;
+        border-bottom: none;
+        border-top-left-radius: 15px;
+        border-top-right-radius: 15px;
+      }
+      .btn-success {
+        background-color: #5da341;
+        border-color: #5da341;
+      }
+      .form-control {
+        border-radius: 10px;
+      }
+      .invalid-feedback {
+        font-size: 14px;
+        color: #ff6b6b;
+      }
+      .card-title {
+        font-size: 24px;
+        font-weight: bold;
+      }
+      .card-subtitle {
+        font-size: 16px;
+        color: #888;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container mt-5">
+      <div class="row justify-content-center">
+        <div class="col-md-4">
+          <div class="card">
+            <div class="card-header text-center">
+              <h3 class="mb-0">네이버 부동산 매물정보</h3>
+              <!-- <p class="card-subtitle">Welcome back! Log in to access your account.</p> -->
+            </div>
+            <div class="card-body">
+              <form class="form" role="form" autocomplete="off" id="loginForm" novalidate="" method="POST" action="/login">
+                <div class="form-group">
+                  <label for="userid">User ID:</label>
+                  <input type="text" class="form-control form-control-lg rounded-0" name="userid" id="userid" required="" />
+                  <div class="invalid-feedback">Oops, you missed this one.</div>
+                </div>
+                <div class="form-group">
+                  <label>Password:</label>
+                  <input type="password" class="form-control form-control-lg rounded-0" id="password" name="password" required="" autocomplete="new-password" />
+                  <div class="invalid-feedback">Enter your password too!</div>
+                </div>
+                <button type="submit" class="btn btn-success btn-lg float-right" id="btnLogin">Login</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  </body>
+</html>
+
+<!-- Add this code in your login.html template where you want to display messages -->
+{% with messages = get_flashed_messages() %} {% if messages %}
+<div class="alert alert-danger">
+  <ul class="mb-0">
+    {% for message in messages %}
+    <li>{{ message }}</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endif %} {% endwith %}
