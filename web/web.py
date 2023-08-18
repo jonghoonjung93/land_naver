@@ -40,14 +40,27 @@ def login():
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM account WHERE userid = ? AND password = ?", (userid, password))
     user = cursor.fetchone()
-    conn.close()
+    # conn.close()
 
     if user:    # 로그인 성공
         session['userid'] = user[0]  # Store user ID in session
-        #------------- 이 부분에서 last login 컬럼 update 추가예정
+        # ------ last_login, login_count UPDATE 처리 -------- #
+        # 날짜 (오늘)
+        current_time = datetime.datetime.now()
+        last_login = current_time.strftime("%Y-%m-%d %H:%M:%S")
+        if user[11] is None or user[11] == "":  # 기존 login_count 컬럼 확인
+            before_login_count = 0
+        else:
+            before_login_count = int(user[11])
+        login_count = before_login_count + 1
+        # logging.info(f"{last_login}, {login_count}, {session['userid']}")
+        cursor.execute("UPDATE account SET last_login = ?, login_count = ? WHERE userid = ?", (last_login, login_count, session['userid']))
+        conn.commit()
+        conn.close()
         return redirect(url_for('display_land_items'))
     else:   # 로그인 실패
         flash('Invalid user ID or password. Please try again.', 'error')
+        conn.close()
         return redirect(url_for('index'))
 
 @app.route('/logout')
