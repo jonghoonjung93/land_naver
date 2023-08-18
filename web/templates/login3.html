@@ -44,7 +44,18 @@
       }
       .card-subtitle {
         font-size: 16px;
-        color: #888;
+        color: #5b5959;
+      }
+      /* Style for the footer */
+      footer {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 100%;
+        height: 100px; /* Adjust the height as needed */
+        /* background-color: #f8f9fa; */
+        text-align: center;
+        line-height: 100px; /* Vertically center the text */
       }
     </style>
   </head>
@@ -54,8 +65,8 @@
         <div class="col-md-4">
           <div class="card">
             <div class="card-header text-center">
-              <h3 class="mb-0">네이버 부동산 매물정보</h3>
-              <!-- <p class="card-subtitle">Welcome back! Log in to access your account.</p> -->
+              <h3 class="mb-0">Building Scanner</h3>
+              <p class="card-subtitle">부동산 매물 정보</p>
             </div>
             <div class="card-body">
               <form class="form" role="form" autocomplete="off" id="loginForm" novalidate="" method="POST" action="/login">
@@ -76,6 +87,10 @@
         </div>
       </div>
     </div>
+    <!-- 저작권 정보 footer 추가 -->
+    <footer class="text-center mt-4">
+      <p>&copy; 2023 RealtySync Systems. All Rights Reserved. Version 1.0</p>
+    </footer>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>

@@ -16,7 +16,7 @@ DATABASE = '../land_naver.sqlite3'
 # access_handler.setFormatter(logging.Formatter('[%(asctime)s] %(message)s'))
 # app.logger.addHandler(access_handler)
 
-logging.basicConfig(filename='web.log', level=logging.DEBUG, format='%(asctime)s - %(message)s', datefmt='%Y.%m.%d %H:%M:%S')
+logging.basicConfig(filename='web.log', level=logging.DEBUG, format='%(asctime)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 
 def query_database(query):
     conn = sqlite3.connect(DATABASE)
