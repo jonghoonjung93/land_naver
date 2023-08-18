@@ -44,12 +44,14 @@
   </head>
   <body>
     <div class="container-fluid mt-5">
-      <div class="header-buttons">
-        <a href="/all" class="btn btn-primary mr-2 {% if request.path == '/all' %}active{% endif %}">전체</a>
-        <a href="/new" class="btn btn-primary {% if request.path == '/new' %}active{% endif %}">신규</a>
-      </div>
-      <div class="table-responsive">
-        <!-- Your table content -->
+      <div class="header-buttons d-flex justify-content-between">
+        <div class="d-flex justify-content-start">
+          <a href="/all" class="btn btn-primary mr-2 {% if request.path == '/all' %}active{% endif %}">전체</a>
+          <a href="/new" class="btn btn-primary {% if request.path == '/new' %}active{% endif %}">신규</a>
+        </div>
+        <div class="d-flex justify-content-end">
+          <a href="{{ url_for("logout") }}" class="btn">로그아웃</a>
+        </div>
       </div>
     </div>
     <div class="container-fluid mt-5">

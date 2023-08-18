@@ -16,6 +16,8 @@ DATABASE = '../land_naver.sqlite3'
 # access_handler.setFormatter(logging.Formatter('[%(asctime)s] %(message)s'))
 # app.logger.addHandler(access_handler)
 
+logging.basicConfig(filename='web.log', level=logging.DEBUG, format='%(asctime)s - %(message)s', datefmt='%Y.%m.%d %H:%M:%S')
+
 def query_database(query):
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
@@ -40,12 +42,18 @@ def login():
     user = cursor.fetchone()
     conn.close()
 
-    if user:
+    if user:    # 로그인 성공
         session['userid'] = user[0]  # Store user ID in session
+        #------------- 이 부분에서 last login 컬럼 update 추가예정
         return redirect(url_for('display_land_items'))
-    else:
+    else:   # 로그인 실패
         flash('Invalid user ID or password. Please try again.', 'error')
         return redirect(url_for('index'))
+
+@app.route('/logout')
+def logout():
+    session.pop('userid')
+    return redirect(url_for('index'))
 
 @app.route('/all')
 def display_land_items():
@@ -75,7 +83,7 @@ def display_land_items_new():
 
 @app.before_request
 def require_login():
-    allowed_routes = ['index', 'login']
+    allowed_routes = ['index', 'login', 'logout']
     # print(request.endpoint)
     # print(session.get('userid'))
     if request.endpoint not in allowed_routes and 'userid' not in session:
@@ -84,7 +92,12 @@ def require_login():
 @app.before_request
 def log_request_info():
     #app.logger.debug(request.remote_addr)
-    app.logger.debug(session.get('userid'))
+    
+    # app.logger.debug(f"userid : {session.get('userid')}, {request.base_url}")
+    
+    logging.info(f"userid : {session.get('userid')}, {request.base_url}")
+
+    # app.logger.debug("BBB")
     #app.logger.debug(request.headers.get('X-Forwarded-For'))
     #app.logger.debug(request.environ.get('HTTP_X_REAL_IP', request.remote_addr))
     #app.logger.debug("Headers: %s", request.headers)
