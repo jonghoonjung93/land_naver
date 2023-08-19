@@ -1,22 +1,21 @@
 import sqlite3
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash, Response
 import logging
 import datetime
+import ipaddress
+from config import *
 
 app = Flask(__name__)
 app.secret_key = 'my_secret_key'
 
-# Replace 'your_database.db' with the path to your SQLite3 database
+# ALLOWED_DOMAINS = ["xxx.xxx.xxx", "127.0.0.1"]    # 실제 데이터는 config.py 에서 별도로 처리
+
 DATABASE = '../land_naver.sqlite3'
 
-# Configuring access log
-# access_log_filename = 'access.log'
-# access_handler = logging.FileHandler(access_log_filename)
-# access_handler.setLevel(logging.INFO)
-# access_handler.setFormatter(logging.Formatter('[%(asctime)s] %(message)s'))
-# app.logger.addHandler(access_handler)
+# logging.basicConfig(filename='web.log', level=logging.DEBUG, format='%(asctime)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+# logging.basicConfig(filename='web.log', level=logging.DEBUG, format='%(asctime)s %(filename)s %(levelname)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+logging.basicConfig(filename='../logs/web.log', level=logging.DEBUG, format='%(asctime)s [%(levelname)s] \t- %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 
-logging.basicConfig(filename='web.log', level=logging.DEBUG, format='%(asctime)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 
 def query_database(query):
     conn = sqlite3.connect(DATABASE)
@@ -108,12 +107,21 @@ def log_request_info():
     
     # app.logger.debug(f"userid : {session.get('userid')}, {request.base_url}")
     
-    logging.info(f"userid : {session.get('userid')}, {request.base_url}")
+    # logging.info(f"userid : {session.get('userid')}, {request.base_url}")
+    logging.debug(f"userid : {session.get('userid')}, {request.base_url}")
 
     # app.logger.debug("BBB")
     #app.logger.debug(request.headers.get('X-Forwarded-For'))
     #app.logger.debug(request.environ.get('HTTP_X_REAL_IP', request.remote_addr))
     #app.logger.debug("Headers: %s", request.headers)
+
+@app.before_request
+def block_unauthorized_access():
+    # logging.debug(ALLOWED_DOMAINS)
+    requested_host = request.host.split(':')[0]  # Remove port if present
+    if requested_host not in ALLOWED_DOMAINS:
+        logging.debug("접속을 거부합니다. Access forbidden, code=403")
+        return Response("Access forbidden", status=403)
 
 if __name__ == '__main__':
     app.run(debug=True)
