@@ -109,7 +109,7 @@ def admin_check(userid):    # 관리자 여부 체크
 
 @app.route('/adm')
 def admin_home():     # 관리자 페이지 메인
-    return redirect(url_for('display_message_list'))
+    return redirect(url_for('display_account'))
 
 @app.route('/adm/message')
 def display_message_list():     # 메세지 발송내역 리스트 (결과확인)
