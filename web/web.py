@@ -2,7 +2,6 @@ import sqlite3
 from flask import Flask, render_template, request, redirect, url_for, session, flash, Response
 import logging
 import datetime
-import ipaddress
 from config import *
 
 flag=True
@@ -107,10 +106,6 @@ def admin_check(userid):    # 관리자 여부 체크
         session.pop('userid')
         return(False)
 
-@app.route('/adm')
-def admin_home():     # 관리자 페이지 메인
-    return redirect(url_for('display_account'))
-
 @app.route('/adm/message')
 def display_message_list():     # 메세지 발송내역 리스트 (결과확인)
     if admin_check(session['userid']):
@@ -128,6 +123,10 @@ def display_account():      # 계정 리스트
         return render_template('account1.html', items=items)
     else:
         return redirect(url_for('index'))
+
+@app.route('/adm')
+def admin_home():     # 관리자 페이지 메인
+    return redirect(url_for('display_account'))
 
 @app.before_request
 def require_login():    # 로그인 여부 체크
