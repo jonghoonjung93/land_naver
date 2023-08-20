@@ -3,13 +3,11 @@
   <head>
     <title>Login Page</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon" />
     <style>
       body {
-        /* background-image: url("https://cdn.pixabay.com/photo/2016/11/29/03/53/house-1867187_1280.jpg"); */
-        /* background-image: url("https://cdn.pixabay.com/photo/2018/01/26/08/37/architecture-3108075_1280.jpg"); */
-        /* background-image: url("https://cdn.pixabay.com/photo/2016/04/25/23/30/house-1353389_1280.jpg"); */
-        /* background-image: url("https://cdn.pixabay.com/photo/2022/10/03/23/41/house-7497001_1280.png"); */
-        background-image: url("https://cdn.pixabay.com/photo/2022/01/11/17/04/city-6931092_1280.jpg");
+        /* background-image: url("https://cdn.pixabay.com/photo/2022/01/11/17/04/city-6931092_1280.jpg"); */
+        background-image: url("{{ url_for('static', filename='images/city-6931092_1280.jpg') }}");
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
