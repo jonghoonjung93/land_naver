@@ -130,7 +130,7 @@ def admin_home():     # 관리자 페이지 메인
 
 @app.before_request
 def require_login():    # 로그인 여부 체크
-    allowed_routes = ['index', 'login', 'logout']
+    allowed_routes = ['index', 'login', 'logout', 'static']
     # print(request.endpoint)
     # print(session.get('userid'))
     if request.endpoint not in allowed_routes and 'userid' not in session:
