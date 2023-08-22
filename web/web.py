@@ -26,6 +26,14 @@ def query_database(query):
     conn.close()
     return result
 
+def query_database_update(query):
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+    cursor.execute(query)
+    conn.commit()
+    cursor.close()
+    conn.close()
+
 @app.route('/')
 def index():
     return render_template('login3.html')
@@ -120,13 +128,31 @@ def display_account():      # 계정 리스트
     if admin_check(session['userid']):
         query = f'SELECT userid, username, admin, available, reg_date, type, location, memo, expire_date, last_login, login_count, chat_id FROM account ORDER BY admin desc,login_count desc;'
         items = query_database(query)
-        return render_template('account1.html', items=items)
+        # return render_template('account1.html', items=items)
+        return render_template('account2.html', items=items)
     else:
         return redirect(url_for('index'))
 
 @app.route('/adm')
 def admin_home():     # 관리자 페이지 메인
     return redirect(url_for('display_account'))
+
+@app.route('/update_column', methods=['POST'])
+def update_column():
+    item_id = request.form.get('item_id')  # Retrieve the item ID from the request
+    old_value = request.form.get('old_value')  # Retrieve the new value from the request
+    
+    # Update the SQLite3 database using item_id and new_value
+    # Add your code here to update the database
+    if old_value == "0":
+        new_value = "1"
+    else:
+        new_value = "0"
+    logging.debug(f"item_id : {item_id}, old_value : {old_value}, new_value : {new_value}")
+    query = f'UPDATE account SET available = {new_value} WHERE userid = "{item_id}"'
+    query_database_update(query)
+    
+    return "Success"  # Return a response
 
 @app.before_request
 def require_login():    # 로그인 여부 체크
