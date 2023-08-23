@@ -358,6 +358,7 @@ def send_lists(lands):	# 전일자와 비교해서 현재 새로운 매물리스
 			# global global_err
 			global_err = global_err + 1
 			printL(f"{land} : ERROR! land_naver 알수없는 에러. count({global_err}), err({e})")
+			# 여기서 실패건에 대해서 파일에 쌓아놓고 재처리를 위한 준비 필요.
 			continue
 		else:	# 정상완료시
 			# print(len(lists))
@@ -481,6 +482,11 @@ if flag:
 		'BLD2-29'
 	]
 
+if len(sys.argv) == 2:
+	printL(f"-- Argument 있음, 단건 수행처리 : {sys.argv[1]}")
+	lands_list = [sys.argv[1]]
+	printL(f"-- lands_list : {lands_list}")
+	global_var = 1	# 단건수행시 '새로운 매물이 없음' 방지
 # lands_list = ['BLD1-20']	# 한개씩 실행할때
 send_lists(lands_list)
 
@@ -528,8 +534,12 @@ if flag:
 
 	delete_day_sql = f"DELETE FROM message_list WHERE date = '{delete_day}'"	# 삭제대상(과거) 데이터 삭제
 	cursor.execute(delete_day_sql)
-	today_delete_message_list_sql = f"DELETE FROM message_list WHERE date = '{formatted_date}' AND send_yn = '0'"	# 당일자 삭제 (이미 있을때 다시 넣기 위해서)
-	cursor.execute(today_delete_message_list_sql)
+	
+	if len(sys.argv) == 2:
+		printL(f"-- 단건 처리중이라 당일자 message_list 테이블 정리 pass")
+	else:
+		today_delete_message_list_sql = f"DELETE FROM message_list WHERE date = '{formatted_date}' AND send_yn = '0'"	# 당일자 삭제 (이미 있을때 다시 넣기 위해서)
+		cursor.execute(today_delete_message_list_sql)
 
 #--- DB 저장함수 ----
 def db_insert(msg):

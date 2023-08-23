@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>My Info</title>
+    <!-- Include your CSS and JavaScript links here -->
+  </head>
+  <body>
+    <h1>My Info</h1>
+    <form id="passwordChangeForm">
+      <div>
+        <label for="oldPassword">Old Password:</label>
+        <input type="password" id="oldPassword" name="oldPassword" required />
+      </div>
+      <div>
+        <label for="newPassword">New Password:</label>
+        <input type="password" id="newPassword" name="newPassword" required />
+      </div>
+      <div>
+        <label for="confirmPassword">Confirm New Password:</label>
+        <input type="password" id="confirmPassword" name="confirmPassword" required />
+      </div>
+      <button type="submit">Change Password</button>
+    </form>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+      $(document).ready(function () {
+        $("#passwordChangeForm").submit(function (event) {
+          event.preventDefault();
+
+          var oldPassword = $("#oldPassword").val();
+          var newPassword = $("#newPassword").val();
+          var confirmPassword = $("#confirmPassword").val();
+
+          $.ajax({
+            type: "POST",
+            url: "/update_password",
+            data: {
+              oldPassword: oldPassword,
+              newPassword: newPassword,
+              confirmPassword: confirmPassword,
+            },
+            success: function (response) {
+              // Display a success message to the user
+              console.log(response.message);
+              console.log(response.result);
+              if (response.result) {
+                console.log("패스워드 변경 성공");
+                // 패스워드 변경 완료 메세지 화면출력
+              } else {
+                console.log("패스워드 변경 실패");
+                // 패스워드 변경 실패 메세지 화면출력
+              }
+            },
+            error: function (error) {
+              // Display an error message to the user
+              //   console.error(error.responseJSON.error);
+              console.error(response.error);
+            },
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

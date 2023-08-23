@@ -50,7 +50,8 @@
           <a href="/new" class="btn btn-primary {% if request.path == '/new' %}active{% endif %}">신규</a>
         </div>
         <div class="d-flex justify-content-end">
-          <h5 class="mr-3">{{ userid }}</h5>
+          <!-- <h5 id="userid" class="mr-3">{{ userid }}</h5> -->
+          <h5 id="userid" class="mr-3" data-toggle="tooltip" data-placement="bottom" title="password 변경">{{ userid }}</h5>
           <a href="{{ url_for("logout") }}" class="btn">로그아웃</a>
         </div>
       </div>
@@ -124,6 +125,14 @@
           ],
           // ordering: false, // Disable sorting for the entire table
         });
+      });
+      $(document).ready(function() {
+        $("#userid").click(function() {
+          window.location.href = "/myinfo";
+        });
+      });
+      $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
       });
     </script>
   </body>

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>My Info</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f5f5f5;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+
+      .container {
+        background-color: #fff;
+        padding: 40px;
+        border-radius: 10px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        width: 400px;
+      }
+
+      h2 {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      label {
+        font-weight: bold;
+      }
+
+      input[type="password"] {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 20px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+      }
+
+      button[type="submit"] {
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        padding: 10px 20px;
+        cursor: pointer;
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>Password 변경</h2>
+      <form id="passwordChangeForm">
+        <div>
+          <label for="oldPassword">Old Password:</label>
+          <input type="password" id="oldPassword" name="oldPassword" required />
+        </div>
+        <div>
+          <label for="newPassword">New Password:</label>
+          <input type="password" id="newPassword" name="newPassword" required />
+        </div>
+        <div>
+          <label for="confirmPassword">Confirm New Password:</label>
+          <input type="password" id="confirmPassword" name="confirmPassword" required />
+        </div>
+        <button type="submit">Change Password</button>
+      </form>
+      <div id="message" class="mt-3"></div>
+      <!-- Message area -->
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+      $(document).ready(function () {
+        $("#passwordChangeForm").submit(function (event) {
+          event.preventDefault();
+
+          var oldPassword = $("#oldPassword").val();
+          var newPassword = $("#newPassword").val();
+          var confirmPassword = $("#confirmPassword").val();
+
+          $.ajax({
+            type: "POST",
+            url: "/update_password",
+            data: {
+              oldPassword: oldPassword,
+              newPassword: newPassword,
+              confirmPassword: confirmPassword,
+            },
+            success: function (response) {
+              // Display a success message to the user
+              console.log(response.message);
+              console.log(response.result);
+              if (response.result) {
+                console.log("패스워드 변경 성공");
+                // 패스워드 변경 완료 메세지 화면출력
+                $("#message").html('<p class="text-success">Password change successful.</p>');
+                // Clear input fields on success
+                $("#oldPassword").val("");
+                $("#newPassword").val("");
+                $("#confirmPassword").val("");
+              } else {
+                console.log("패스워드 변경 실패");
+                // 패스워드 변경 실패 메세지 화면출력
+                $("#message").html('<p class="text-danger">Password change failed. Please check your input.</p>');
+              }
+            },
+            error: function (error) {
+              // Display an error message to the user
+              //   console.error(error.responseJSON.error);
+              console.error(response.error);
+              $("#message").html('<p class="text-danger">An error occurred while processing your request.</p>');
+            },
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

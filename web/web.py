@@ -164,6 +164,55 @@ def update_column():    # 관리자(account) 페이지에서 특정유저 ON/OFF
     # return "Success"  # Return a response
     return jsonify(response_data)  # Return a JSON response with the updated value
 
+@app.route('/myinfo', methods=['GET'])
+def my_info():
+    return render_template('myinfo1.html')
+
+@app.route('/update_password', methods=['POST'])
+def update_password():
+    old_password = request.form.get('oldPassword')
+    new_password = request.form.get('newPassword')
+    confirm_password = request.form.get('confirmPassword')
+    userid = session['userid']
+
+    logging.debug(f"userid : {userid}")
+    logging.debug(f"old_password : {old_password}")
+    logging.debug(f"new_password : {new_password}")
+    logging.debug(f"confirm_password : {confirm_password}")
+
+    # Check if old_password matches the user's current password
+    validation_passed = False
+    query = f'SELECT count(*) FROM account WHERE userid = "{userid}" AND password = "{old_password}"'
+    result = query_database(query)
+    logging.debug(result[0][0])
+    if result[0][0] == 1:   # old_password 입력한값이 DB값과 일치할 경우
+        logging.debug("old_password validation pass")
+        if new_password == confirm_password:    # 패스워드 두번 입력값이 동일한 경우
+            logging.debug("password confirm validation pass")
+            validation_passed = True
+    logging.debug(validation_passed)
+    
+    # Update the password in the database if validation passes
+    if validation_passed:   # password 변경
+        query = f'UPDATE account SET password = "{new_password}" WHERE userid = "{userid}"'
+        query_database_update(query)
+
+        # Return a success response
+        response_data = {
+           'message': 'Password updated successfully',
+           'result': True
+        }
+        # return jsonify(message='Password updated successfully')
+        return jsonify(response_data)
+    else:
+        # Return an error response
+        response_data = {
+           'message': 'Password update failed due to validation errors',
+           'result': False
+        }
+        # return jsonify(error='Password update failed due to validation errors')
+        return jsonify(response_data)
+
 @app.before_request
 def require_login():    # 로그인 여부 체크
     allowed_routes = ['index', 'login', 'logout', 'static']
