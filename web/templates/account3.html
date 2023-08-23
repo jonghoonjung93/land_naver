@@ -46,8 +46,11 @@
     <div class="container-fluid mt-5">
       <div class="header-buttons d-flex justify-content-between">
         <div class="d-flex justify-content-start">
-          <a href="/all" class="btn btn-primary mr-2 {% if request.path == '/all' %}active{% endif %}">전체</a>
-          <a href="/new" class="btn btn-primary {% if request.path == '/new' %}active{% endif %}">신규</a>
+          <a href="/adm/account" class="btn btn-primary mr-2 {% if request.path == '/adm/account' %}active{% endif %}">account</a>
+          <a href="/adm/message" class="btn btn-primary {% if request.path == '/adm/message' %}active{% endif %}">message</a>
+        </div>
+        <div class="d-flex justify-content-center">
+          <h5>관리자 모드 : account</h5>
         </div>
         <div class="d-flex justify-content-end">
           <h5 class="mr-3">{{ userid }}</h5>
@@ -56,45 +59,42 @@
       </div>
     </div>
     <div class="container-fluid mt-5">
-      <!-- <h1>매물 리스트</h1> -->
+      <!-- <h1>리스트</h1> -->
       <div class="table-responsive">
         <table class="table table-striped table-bordered" id="landItemsTable">
           <thead>
             <tr>
-              <!-- <th>날짜</th> -->
-              <th style="white-space: nowrap">번호</th>
-              <th>건물명</th>
-              <th>종류</th>
-              <th style="white-space: nowrap">구분</th>
-              <th>금액</th>
-              <th>Link</th>
-              <th>TYPE</th>
-              <th>INFO</th>
-              <th style="white-space: nowrap">평(전용)</th>
-              <th>층</th>
-              <th>공인중개사사무소</th>
-              <th>호수 (추정)</th>
+              <th>ON/OFF</th>
+              <th>userid</th>
+              <th>username</th>
+              <th>admin</th>
+              <th>available</th>
+              <th>reg_date</th>
+              <th>type</th>
+              <th>location</th>
+              <th>memo</th>
+              <th>expire_date</th>
+              <th>last_login</th>
+              <th>login_count</th>
+              <th>chat_id</th>
             </tr>
           </thead>
           <tbody>
             {% for item in items %}
             <tr>
-              <!-- <td style="font-size: 14px" nowrap>{{ item[0] }}</td> -->
+              <td><button class="btn btn-primary custom-link-button" data-itemid="{{ item[0] }}" data-oldvalue="{{ item[3] }}">ON/OFF</button></td>
+              <td style="font-size: 14px" nowrap>{{ item[0] }}</td>
               <td style="font-size: 14px" nowrap>{{ item[1] }}</td>
               <td style="font-size: 14px" nowrap>{{ item[2] }}</td>
+              <td class="update-column" style="font-size: 14px" nowrap>{{ item[3] }}</td>
               <td style="font-size: 14px" nowrap>{{ item[4] }}</td>
               <td style="font-size: 14px" nowrap>{{ item[5] }}</td>
               <td style="font-size: 14px" nowrap>{{ item[6] }}</td>
-              <td>
-                <a href="https://new.land.naver.com/offices?articleNo={{ item[3] }}" target="_blank" class="btn btn-primary custom-link-button">Link</a>
-              </td>
               <td style="font-size: 14px" nowrap>{{ item[7] }}</td>
               <td style="font-size: 14px" nowrap>{{ item[8] }}</td>
               <td style="font-size: 14px" nowrap>{{ item[9] }}</td>
               <td style="font-size: 14px" nowrap>{{ item[10] }}</td>
               <td style="font-size: 14px" nowrap>{{ item[11] }}</td>
-              <td style="font-size: 14px" nowrap>{{ item[12] }}</td>
-            </tr>
             {% endfor %}
           </tbody>
         </table>
@@ -122,9 +122,39 @@
           columnDefs: [
             { targets: [4, 5], orderable: false }, // Disable sorting for the "금액" column (index 5)
           ],
-          // ordering: false, // Disable sorting for the entire table
+          ordering: false, // Disable sorting for the entire table
+        });
+
+        // Attach the click handler to a static parent element
+      $("#landItemsTable").on("click", ".custom-link-button", function () {
+        var button = $(this);
+        var itemID = button.data("itemid");
+        var oldValue = button.data("oldvalue");
+
+        // console.log(oldValue)
+
+        var currentButton = button;
+
+        $.ajax({
+          type: "POST",
+          url: "/update_column",
+          data: { item_id: itemID, old_value: oldValue },
+          success: function (response) {
+            var newValue = response.new_value;
+
+            // Update class "update-column" (화면에 보여지는 값만 바뀜)
+            currentButton.closest("tr").find(".update-column").text(newValue);
+            
+            // console.log(newValue)
+            location.reload();  // reload 하지않고 컬럼값만 바꾸면 한번은 되는데, 변경된 값이 보여지는 부분만 바뀌니 두번째가 안됨.
+            console.log("Update successful");
+          },
+          error: function (error) {
+            console.error("Update failed");
+          },
         });
       });
+    });
     </script>
   </body>
 </html>

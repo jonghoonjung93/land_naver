@@ -1,8 +1,9 @@
 import sqlite3
-from flask import Flask, render_template, request, redirect, url_for, session, flash, Response
+from flask import Flask, render_template, request, redirect, url_for, session, flash, Response, jsonify
 import logging
 import datetime
 from config import *
+# import json
 
 flag=True
 if flag:
@@ -88,7 +89,8 @@ def display_land_items():   # 전체 매물리스트
     # formatted_date = '20230722'
     query = f'SELECT date, replace(bld_id,"BLD",""), memo, naver_bld_id, name, type, price, info_area_type, info_area_spec, ROUND(size_real*0.3025, 2), floor, agent_name, ho FROM land_item where date = "{formatted_date}";'
     items = query_database(query)
-    return render_template('land_item5.html', items=items)
+    userid = session['userid']
+    return render_template('land_item5.html', items=items, userid=userid)
 
 @app.route('/new')
 def display_land_items_new():   # 금일 신규 매물리스트
@@ -101,7 +103,8 @@ def display_land_items_new():   # 금일 신규 매물리스트
     # formatted_date = '20230722'
     query = f'SELECT date, replace(bld_id,"BLD",""), memo, naver_bld_id, name, type, price, info_area_type, info_area_spec, ROUND(size_real*0.3025, 2), floor, agent_name, ho FROM land_item where date = "{formatted_date}" and new = "O";'
     items = query_database(query)
-    return render_template('land_item5.html', items=items)
+    userid = session['userid']
+    return render_template('land_item5.html', items=items, userid=userid)
 
 def admin_check(userid):    # 관리자 여부 체크
     query = f'SELECT admin FROM account WHERE userid = "{userid}"'
@@ -119,7 +122,8 @@ def display_message_list():     # 메세지 발송내역 리스트 (결과확인
     if admin_check(session['userid']):
         query = f'SELECT date, send_yn, retry, result, m.chat_id, a.username, message FROM message_list m, account a WHERE m.chat_id = a.chat_id ORDER BY m.date desc, m.id;'
         items = query_database(query)
-        return render_template('message_list1.html', items=items)
+        userid = session['userid']
+        return render_template('message_list1.html', items=items, userid=userid)
     else:
         return redirect(url_for('index'))
 
@@ -128,8 +132,9 @@ def display_account():      # 계정 리스트
     if admin_check(session['userid']):
         query = f'SELECT userid, username, admin, available, reg_date, type, location, memo, expire_date, last_login, login_count, chat_id FROM account ORDER BY admin desc,login_count desc;'
         items = query_database(query)
+        userid = session['userid']
         # return render_template('account1.html', items=items)
-        return render_template('account2.html', items=items)
+        return render_template('account3.html', items=items, userid=userid)
     else:
         return redirect(url_for('index'))
 
@@ -138,7 +143,7 @@ def admin_home():     # 관리자 페이지 메인
     return redirect(url_for('display_account'))
 
 @app.route('/update_column', methods=['POST'])
-def update_column():
+def update_column():    # 관리자(account) 페이지에서 특정유저 ON/OFF 버튼 동작
     item_id = request.form.get('item_id')  # Retrieve the item ID from the request
     old_value = request.form.get('old_value')  # Retrieve the new value from the request
     
@@ -152,7 +157,12 @@ def update_column():
     query = f'UPDATE account SET available = {new_value} WHERE userid = "{item_id}"'
     query_database_update(query)
     
-    return "Success"  # Return a response
+    # Create a dictionary with the updated value
+    response_data = {
+        'new_value': new_value
+    }
+    # return "Success"  # Return a response
+    return jsonify(response_data)  # Return a JSON response with the updated value
 
 @app.before_request
 def require_login():    # 로그인 여부 체크
