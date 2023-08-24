@@ -215,9 +215,9 @@ def land_naver(building):
 		agent_name_list = item.find_elements(By.CLASS_NAME, 'agent_name')
 		agent_name = agent_name_list[1].text
 		info_count = info_area_spec.count(",")
-		if info_count == 2:
+		if info_count == 2:		#3덩어리
 			var1, var2, var3 = info_area_spec.split(',')
-		elif info_count == 1:
+		elif info_count == 1:	#2덩어리
 			var1, var2 = info_area_spec.split(',')
 			var3 = ""
 		else:
@@ -255,8 +255,11 @@ def land_naver(building):
 			price_base = price
 			price_mon = ""
 		
+		#--- info_area_spec 에서 var3(??향) 부분 제거하기
+		info_col = f'{var1},{var2}'
+
 		# 해당 매물이 기존에 DB에 있는지 확인 (어제자와 비교)
-		select_sql = f"SELECT * FROM land_item WHERE date='{yesterday}' AND bld_id = '{bld_id}' AND price = '{price}' AND info_area_spec = '{info_area_spec}' AND agent_name = '{agent_name}'"
+		select_sql = f"SELECT * FROM land_item WHERE date='{yesterday}' AND bld_id = '{bld_id}' AND price = '{price}' AND info_area_spec = '{info_col}' AND agent_name = '{agent_name}'"
 		cursor.execute(select_sql)
 		result_select = cursor.fetchone()
 		# print(result_select)
@@ -264,17 +267,17 @@ def land_naver(building):
 		if result_select is not None:	# 매물을 어제자 DB에서 조회했는데 이미 있던 매물일 경우
 			# print("있다")
 			new = ""
-			tuple1 = (formatted_date, bld_id, memo, address_short, url, naver_bld_id, name, type, price, price_base, price_mon, info_area_type, info_area_spec, size_total, size_real, floor, agent_name, ho, new)
+			tuple1 = (formatted_date, bld_id, memo, address_short, url, naver_bld_id, name, type, price, price_base, price_mon, info_area_type, info_col, size_total, size_real, floor, agent_name, ho, new)
 		else:	# 매물이 어제자 DB에 없는 새로운 매물일 경우
 			# print("없음. 새로운 매물!!!!")
 			new = "O"
-			tuple1 = (formatted_date, bld_id, memo, address_short, url, naver_bld_id, name, type, price, price_base, price_mon, info_area_type, info_area_spec, size_total, size_real, floor, agent_name, ho, new)
+			tuple1 = (formatted_date, bld_id, memo, address_short, url, naver_bld_id, name, type, price, price_base, price_mon, info_area_type, info_col, size_total, size_real, floor, agent_name, ho, new)
 			new_list.append(tuple1)
 			global global_new
 			global_new = global_new + 1
 
 		data_list.append(tuple1)	# tuple 을 list 에 추가
-		result = f"{name} | {type} | {price} | {info_area_type} | {info_area_spec} | {agent_name} | {ho}"
+		result = f"{name} | {type} | {price} | {info_area_type} | {info_col} | {agent_name} | {ho}"
 
 	# print(new_list)
 
@@ -482,7 +485,7 @@ if flag:
 		'BLD2-29'
 	]
 
-if len(sys.argv) == 2:
+if len(sys.argv) == 2:	# Argument 있을때, 단건처리
 	printL(f"-- Argument 있음, 단건 수행처리 : {sys.argv[1]}")
 	lands_list = [sys.argv[1]]
 	printL(f"-- lands_list : {lands_list}")
