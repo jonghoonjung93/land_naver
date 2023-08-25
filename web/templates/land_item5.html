@@ -126,12 +126,13 @@
       // var line = "{{ line }}";
       $(document).ready(function () {
         $("#landItemsTable").DataTable({
-          // pageLength: 10, // Set the number of rows displayed per page
-          pageLength: "{{ line }}", // Set the number of rows displayed per page
+          pageLength: 10, // Set the number of rows displayed per page
+          // pageLength: "{{ line }}", // Set the number of rows displayed per page
+          // pageLength: line, // Set the number of rows displayed per page
           lengthMenu: [10, 15, 20, 30, 40, 50, 100, 200, 500, 1000], // Set the custom options for the entry display part
           columnDefs: [
             // { targets: [4, 5], orderable: false }, // Disable sorting for the "금액" column (index 5)
-            { targets: [5], orderable: false }, // Disable sorting for the "금액" column (index 5)
+            { targets: [7], orderable: false }, // Disable sorting for the "금액" column (index 5)
           ],
           // ordering: false, // Disable sorting for the entire table
         });
