@@ -49,6 +49,9 @@
           <a href="/all" class="btn btn-primary mr-2 {% if request.path == '/all' %}active{% endif %}">전체</a>
           <a href="/new" class="btn btn-primary {% if request.path == '/new' %}active{% endif %}">신규</a>
         </div>
+        <div class="d-flex justify-content-center">
+          <h5>{{ today }}</h5>
+        </div>
         <div class="d-flex justify-content-end">
           <!-- <h5 id="userid" class="mr-3">{{ userid }}</h5> -->
           <h5 id="userid" class="mr-3" data-toggle="tooltip" data-placement="bottom" title="password 변경">{{ userid }}</h5>
@@ -68,11 +71,11 @@
               <th>종류</th>
               <th style="white-space: nowrap">구분</th>
               <th>금액</th>
+              <th style="white-space: nowrap">평</th>
+              <th>층</th>
               <th>Link</th>
               <th>TYPE</th>
               <th>INFO</th>
-              <th style="white-space: nowrap">평(전용)</th>
-              <th>층</th>
               <th>공인중개사사무소</th>
               <th>호수 (추정)</th>
             </tr>
@@ -86,13 +89,13 @@
               <td style="font-size: 14px" nowrap>{{ item[4] }}</td>
               <td style="font-size: 14px" nowrap>{{ item[5] }}</td>
               <td style="font-size: 14px" nowrap>{{ item[6] }}</td>
+              <td style="font-size: 14px" nowrap>{{ item[9] }}</td>
+              <td style="font-size: 14px" nowrap>{{ item[10] }}</td>              
               <td>
                 <a href="https://new.land.naver.com/offices?articleNo={{ item[3] }}" target="_blank" class="btn btn-primary custom-link-button">Link</a>
               </td>
               <td style="font-size: 14px" nowrap>{{ item[7] }}</td>
               <td style="font-size: 14px" nowrap>{{ item[8] }}</td>
-              <td style="font-size: 14px" nowrap>{{ item[9] }}</td>
-              <td style="font-size: 14px" nowrap>{{ item[10] }}</td>
               <td style="font-size: 14px" nowrap>{{ item[11] }}</td>
               <td style="font-size: 14px" nowrap>{{ item[12] }}</td>
             </tr>
@@ -118,8 +121,8 @@
     <script>
       $(document).ready(function () {
         $("#landItemsTable").DataTable({
-          pageLength: 15, // Set the number of rows displayed per page
-          lengthMenu: [10, 15, 20, 30, 40, 50, 100], // Set the custom options for the entry display part
+          pageLength: 10, // Set the number of rows displayed per page
+          lengthMenu: [10, 15, 20, 30, 40, 50, 100, 200, 500, 1000], // Set the custom options for the entry display part
           columnDefs: [
             // { targets: [4, 5], orderable: false }, // Disable sorting for the "금액" column (index 5)
             { targets: [5], orderable: false }, // Disable sorting for the "금액" column (index 5)

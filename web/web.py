@@ -86,11 +86,12 @@ def display_land_items():   # 전체 매물리스트
     # 날짜 (오늘)
     current_time = datetime.datetime.now()
     formatted_date = current_time.strftime("%Y%m%d")
+    formatted_date2 = current_time.strftime("%Y.%m.%d")
     # formatted_date = '20230722'
     query = f'SELECT date, replace(bld_id,"BLD",""), memo, naver_bld_id, name, type, price, info_area_type, info_area_spec, ROUND(size_real*0.3025, 2), floor, agent_name, ho FROM land_item where date = "{formatted_date}";'
     items = query_database(query)
     userid = session['userid']
-    return render_template('land_item5.html', items=items, userid=userid)
+    return render_template('land_item5.html', items=items, userid=userid, today=formatted_date2)
 
 @app.route('/new')
 def display_land_items_new():   # 금일 신규 매물리스트
@@ -100,11 +101,12 @@ def display_land_items_new():   # 금일 신규 매물리스트
     # 날짜 (오늘)
     current_time = datetime.datetime.now()
     formatted_date = current_time.strftime("%Y%m%d")
+    formatted_date2 = current_time.strftime("%Y.%m.%d")
     # formatted_date = '20230722'
     query = f'SELECT date, replace(bld_id,"BLD",""), memo, naver_bld_id, name, type, price, info_area_type, info_area_spec, ROUND(size_real*0.3025, 2), floor, agent_name, ho FROM land_item where date = "{formatted_date}" and new = "O";'
     items = query_database(query)
     userid = session['userid']
-    return render_template('land_item5.html', items=items, userid=userid)
+    return render_template('land_item5.html', items=items, userid=userid, today=formatted_date2)
 
 def admin_check(userid):    # 관리자 여부 체크
     query = f'SELECT admin FROM account WHERE userid = "{userid}"'
