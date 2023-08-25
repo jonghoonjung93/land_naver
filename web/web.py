@@ -100,7 +100,11 @@ def display_land_items():   # 전체 매물리스트
 
     items = query_database(query)
     userid = session['userid']
-    return render_template('land_item5.html', items=items, userid=userid, today=formatted_date2)
+    if userid == "choish":
+        line = 10
+    else:
+        line = 15
+    return render_template('land_item5.html', items=items, userid=userid, today=formatted_date2, line=line)
 
 @app.route('/new')
 def display_land_items_new():   # 금일 신규 매물리스트
@@ -124,7 +128,11 @@ def display_land_items_new():   # 금일 신규 매물리스트
 
     items = query_database(query)
     userid = session['userid']
-    return render_template('land_item5.html', items=items, userid=userid, today=formatted_date2)
+    if userid == "choish":
+        line = 10
+    else:
+        line = 15
+    return render_template('land_item5.html', items=items, userid=userid, today=formatted_date2, line=line)
 
 def admin_check(userid):    # 관리자 여부 체크
     query = f'SELECT admin FROM account WHERE userid = "{userid}"'

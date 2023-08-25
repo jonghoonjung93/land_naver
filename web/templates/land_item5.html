@@ -123,9 +123,11 @@
     <script src="https://cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"></script>
 
     <script>
+      // var line = "{{ line }}";
       $(document).ready(function () {
         $("#landItemsTable").DataTable({
-          pageLength: 10, // Set the number of rows displayed per page
+          // pageLength: 10, // Set the number of rows displayed per page
+          pageLength: "{{ line }}", // Set the number of rows displayed per page
           lengthMenu: [10, 15, 20, 30, 40, 50, 100, 200, 500, 1000], // Set the custom options for the entry display part
           columnDefs: [
             // { targets: [4, 5], orderable: false }, // Disable sorting for the "금액" column (index 5)
@@ -208,6 +210,12 @@
         var groupByCheckbox = document.getElementById('groupByCheckbox');
         groupByCheckbox.checked = false;
         updateCheckboxState();
+      }
+      // rm_dup 없이 접속시에 체크박스 해제된 상태로 보이기
+      function initializeCheckboxState() {
+        var groupByCheckbox = document.getElementById('groupByCheckbox');
+        var urlParams = new URLSearchParams(window.location.search);
+        groupByCheckbox.checked = urlParams.has('rm_dup') ? urlParams.get('rm_dup') === 'true' : false;
       }
     
       // Call the initialization function when the page loads
