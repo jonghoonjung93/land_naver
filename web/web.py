@@ -91,20 +91,19 @@ def display_land_items():   # 전체 매물리스트
     
     # Get the value of the checkbox (True if checked, False if not)
     rm_dup = request.args.get('rm_dup', False)
-
     query = f'SELECT date, replace(bld_id,"BLD",""), memo, naver_bld_id, name, type, price, info_area_type, info_area_spec, ROUND(size_real*0.3025, 2), floor, agent_name, ho FROM land_item where date = "{formatted_date}"'
     # Add GROUP BY clause if checkbox is checked
     if rm_dup == 'true':
         query += ' GROUP BY bld_id, price, info_area_spec'
     query += ';'
-
     items = query_database(query)
+
     userid = session['userid']
-    if userid == "choish":
-        line = 10
-    else:
-        line = 15
-    return render_template('land_item5.html', items=items, userid=userid, today=formatted_date2, line=line)
+    query = f'SELECT line FROM account WHERE userid = "{userid}"'
+    line = query_database(query)
+    # logging.debug(f'line = {line[0][0]}')
+
+    return render_template('land_item5.html', items=items, userid=userid, today=formatted_date2, line=line[0][0])
 
 @app.route('/new')
 def display_land_items_new():   # 금일 신규 매물리스트
@@ -119,20 +118,19 @@ def display_land_items_new():   # 금일 신규 매물리스트
 
     # Get the value of the checkbox (True if checked, False if not)
     rm_dup = request.args.get('rm_dup', False)
-
     query = f'SELECT date, replace(bld_id,"BLD",""), memo, naver_bld_id, name, type, price, info_area_type, info_area_spec, ROUND(size_real*0.3025, 2), floor, agent_name, ho FROM land_item where date = "{formatted_date}" and new = "O"'
     # Add GROUP BY clause if checkbox is checked
     if rm_dup == 'true':
         query += ' GROUP BY bld_id, price, info_area_spec'
     query += ';'
-
     items = query_database(query)
+    
     userid = session['userid']
-    if userid == "choish":
-        line = 10
-    else:
-        line = 15
-    return render_template('land_item5.html', items=items, userid=userid, today=formatted_date2, line=line)
+    query = f'SELECT line FROM account WHERE userid = "{userid}"'
+    line = query_database(query)
+    # logging.debug(f'line = {line[0][0]}')
+    
+    return render_template('land_item5.html', items=items, userid=userid, today=formatted_date2, line=line[0][0])
 
 def admin_check(userid):    # 관리자 여부 체크
     query = f'SELECT admin FROM account WHERE userid = "{userid}"'
