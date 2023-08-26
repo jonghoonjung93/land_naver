@@ -2,10 +2,14 @@
 <html>
   <head>
     <title>Building Scanner</title>
+    
     <!-- Link to Bootstrap CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+    
     <!-- Link to DataTables CSS -->
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.4/css/jquery.dataTables.min.css" />
+    <!-- <link rel="stylesheet" href="https://cdn.datatables.net/1.11.4/css/jquery.dataTables.min.css" /> -->
+    <link rel="stylesheet" href="static/DataTables/datatables.min.css" />
+    
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon" />
     <style>
       .custom-link-button {
@@ -120,7 +124,9 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
     <!-- Link to DataTables JS -->
-    <script src="https://cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"></script>
+    <!-- <script src="https://cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"></script> -->
+    <script src="static/DataTables/datatables.min.js"></script>
+    <!-- <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.js"></script> -->
 
     <script>
       // var line = "{{ line }}";
@@ -129,7 +135,7 @@
           pageLength: 10, // Set the number of rows displayed per page
           // pageLength: "{{ line }}", // Set the number of rows displayed per page
           // pageLength: line, // Set the number of rows displayed per page
-          lengthMenu: [10, 15, 20, 30, 40, 50, 100, 200, 500, 1000], // Set the custom options for the entry display part
+          lengthMenu: [10, 15, 20, 30, 40, 50, 100, 200, 500], // Set the custom options for the entry display part
           columnDefs: [
             // { targets: [4, 5], orderable: false }, // Disable sorting for the "금액" column (index 5)
             { targets: [7], orderable: false }, // Disable sorting for the "금액" column (index 5)
