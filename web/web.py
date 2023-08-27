@@ -55,8 +55,6 @@ def login():
         # 날짜 (오늘)
         current_time = datetime.datetime.now()
         last_login = current_time.strftime("%Y-%m-%d %H:%M:%S")
-        session_date = current_time.strftime("%Y-%m-%d")
-        session['date'] = session_date
         if user[11] is None or user[11] == "":  # 기존 login_count 컬럼 확인
             before_login_count = 0
         else:
@@ -255,11 +253,15 @@ def require_login():    # 로그인 여부 체크
         query_database(query)
         result_last_login = query_database(query)
         last_login_db = result_last_login[0][0][:10]    # last_login 컬럼의 YYYY-MM-DD 부분만 가져옴
-        # last_login_db = '2023-08-26'
-        last_login_session = session['date']
-        # logging.debug(f'------- last_login : {last_login_db}, {last_login_session}')
-        if last_login_db != last_login_session:
-            logging.debug(f'--- 로그인 세션 만료. last_login : {last_login_db}, {last_login_session}')
+
+        # 날짜 (오늘)
+        current_time = datetime.datetime.now()
+        current_date = current_time.strftime("%Y-%m-%d")
+        # current_date = '2023-08-26'
+
+        # logging.debug(f'------- last_login : {last_login_db}, {current_date}')
+        if last_login_db != current_date:
+            logging.debug(f'--- 로그인 세션 만료. last_login : {last_login_db}, {current_date}')
             return redirect(url_for('index'))
 
 @app.before_request
