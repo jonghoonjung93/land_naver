@@ -94,7 +94,7 @@ def display_land_items():   # 전체 매물리스트
     query = f'SELECT date, replace(bld_id,"BLD",""), memo, naver_bld_id, name, type, price, info_area_type, info_area_spec, ROUND(size_real*0.3025, 2), floor, agent_name, ho FROM land_item where date = "{formatted_date}"'
     # Add GROUP BY clause if checkbox is checked
     if rm_dup == 'true':
-        query += ' GROUP BY bld_id, price, info_area_spec'
+        query += ' GROUP BY bld_id, price, size_real'
     query += ';'
     items = query_database(query)
 
@@ -121,7 +121,7 @@ def display_land_items_new():   # 금일 신규 매물리스트
     query = f'SELECT date, replace(bld_id,"BLD",""), memo, naver_bld_id, name, type, price, info_area_type, info_area_spec, ROUND(size_real*0.3025, 2), floor, agent_name, ho FROM land_item where date = "{formatted_date}" and new = "O"'
     # Add GROUP BY clause if checkbox is checked
     if rm_dup == 'true':
-        query += ' GROUP BY bld_id, price, info_area_spec'
+        query += ' GROUP BY bld_id, price, size_real'
     query += ';'
     items = query_database(query)
     
