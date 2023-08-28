@@ -91,9 +91,15 @@ def display_land_items():   # 전체 매물리스트
     
     # Get the value of the checkbox (True if checked, False if not)
     rm_dup = request.args.get('rm_dup', False)
-    query = f'SELECT date, replace(bld_id,"BLD",""), memo, naver_bld_id, name, type, price, info_area_type, info_area_spec, ROUND(size_real*0.3025, 2), floor, agent_name, ho FROM land_item where date = "{formatted_date}"'
+    ho = "ho"
+    def query_f(ho):
+        result_sql = f'SELECT date, replace(bld_id,"BLD",""), memo, naver_bld_id, name, type, price, info_area_type, info_area_spec, ROUND(size_real*0.3025, 2), floor, agent_name, {ho} FROM land_item where date = "{formatted_date}"'
+        return result_sql
+    query = query_f(ho)
     # Add GROUP BY clause if checkbox is checked
     if rm_dup == 'true':
+        ho = "MAX(ho) AS ho"
+        query = query_f(ho)
         query += ' GROUP BY bld_id, price, size_real'
     query += ';'
     items = query_database(query)
@@ -118,9 +124,15 @@ def display_land_items_new():   # 금일 신규 매물리스트
 
     # Get the value of the checkbox (True if checked, False if not)
     rm_dup = request.args.get('rm_dup', False)
-    query = f'SELECT date, replace(bld_id,"BLD",""), memo, naver_bld_id, name, type, price, info_area_type, info_area_spec, ROUND(size_real*0.3025, 2), floor, agent_name, ho FROM land_item where date = "{formatted_date}" and new = "O"'
+    ho = "ho"
+    def query_f(ho):
+        result_sql = f'SELECT date, replace(bld_id,"BLD",""), memo, naver_bld_id, name, type, price, info_area_type, info_area_spec, ROUND(size_real*0.3025, 2), floor, agent_name, {ho} FROM land_item where date = "{formatted_date}" and new = "O"'
+        return result_sql
+    query = query_f(ho)
     # Add GROUP BY clause if checkbox is checked
     if rm_dup == 'true':
+        ho = "MAX(ho) AS ho"
+        query = query_f(ho)
         query += ' GROUP BY bld_id, price, size_real'
     query += ';'
     items = query_database(query)
