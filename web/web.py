@@ -93,7 +93,8 @@ def display_land_items():   # 전체 매물리스트
     rm_dup = request.args.get('rm_dup', False)
     ho = "ho"
     def query_f(ho):
-        result_sql = f'SELECT ROW_NUMBER() OVER (ORDER BY bld_id) AS row_no, replace(bld_id,"BLD",""), memo, naver_bld_id, name, type, price, info_area_type, info_area_spec, ROUND(size_real*0.3025, 2), floor, agent_name, {ho} FROM land_item where date = "{formatted_date}"'
+        # result_sql = f'SELECT ROW_NUMBER() OVER (ORDER BY bld_id) AS row_no, replace(bld_id,"BLD",""), memo, naver_bld_id, name, type, price, info_area_type, info_area_spec, ROUND(size_real*0.3025, 2), floor, agent_name, {ho} FROM land_item where date = "{formatted_date}"'
+        result_sql = f'SELECT date, replace(bld_id,"BLD",""), memo, naver_bld_id, name, type, price, info_area_type, info_area_spec, ROUND(size_real*0.3025, 2), floor, agent_name, {ho} FROM land_item where date = "{formatted_date}"'
         return result_sql
     query = query_f(ho)
     # Add GROUP BY clause if checkbox is checked
@@ -126,7 +127,8 @@ def display_land_items_new():   # 금일 신규 매물리스트
     rm_dup = request.args.get('rm_dup', False)
     ho = "ho"
     def query_f(ho):
-        result_sql = f'SELECT ROW_NUMBER() OVER (ORDER BY bld_id) AS row_no, replace(bld_id,"BLD",""), memo, naver_bld_id, name, type, price, info_area_type, info_area_spec, ROUND(size_real*0.3025, 2), floor, agent_name, {ho} FROM land_item where date = "{formatted_date}" and new = "O"'
+        # result_sql = f'SELECT ROW_NUMBER() OVER (ORDER BY bld_id) AS row_no, replace(bld_id,"BLD",""), memo, naver_bld_id, name, type, price, info_area_type, info_area_spec, ROUND(size_real*0.3025, 2), floor, agent_name, {ho} FROM land_item where date = "{formatted_date}" and new = "O"'
+        result_sql = f'SELECT date, replace(bld_id,"BLD",""), memo, naver_bld_id, name, type, price, info_area_type, info_area_spec, ROUND(size_real*0.3025, 2), floor, agent_name, {ho} FROM land_item where date = "{formatted_date}" and new = "O"'
         return result_sql
     query = query_f(ho)
     # Add GROUP BY clause if checkbox is checked
