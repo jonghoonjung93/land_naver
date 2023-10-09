@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Login Page</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon" />
+    <style>
+      body {
+        /* background-image: url("https://cdn.pixabay.com/photo/2022/01/11/17/04/city-6931092_1280.jpg"); */
+        background-image: url("{{ url_for('static', filename='images/city-6931092_1280.jpg') }}");
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+      }
+      .card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.1);
+      }
+      .card-header {
+        background-color: #5da341;
+        color: white;
+        border-bottom: none;
+        border-top-left-radius: 15px;
+        border-top-right-radius: 15px;
+      }
+      .btn-success {
+        background-color: #5da341;
+        border-color: #5da341;
+      }
+      .form-control {
+        border-radius: 10px;
+      }
+      .invalid-feedback {
+        font-size: 14px;
+        color: #ff6b6b;
+      }
+      .card-title {
+        font-size: 24px;
+        font-weight: bold;
+      }
+      .card-subtitle {
+        font-size: 16px;
+        color: #5b5959;
+      }
+      /* Style for the footer */
+      footer {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 100%;
+        height: 100px; /* Adjust the height as needed */
+        /* background-color: #f8f9fa; */
+        text-align: center;
+        line-height: 100px; /* Vertically center the text */
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container mt-5">
+      <div class="row justify-content-center">
+        <div class="col-md-4">
+          <div class="card">
+            <div class="card-header text-center">
+              <h3 class="mb-0">Building Scanner</h3>
+              <p class="card-subtitle">부동산 매물 정보</p>
+            </div>
+            <div class="card-body">
+              <form class="form" role="form" autocomplete="off" id="loginForm" novalidate="" method="POST" action="/login">
+                <div class="form-group">
+                  <label for="userid">User ID:</label>
+                  <input type="text" class="form-control form-control-lg rounded-0" name="userid" id="userid" required="" />
+                  <div class="invalid-feedback">Oops, you missed this one.</div>
+                </div>
+                <div class="form-group">
+                  <label>Password:</label>
+                  <input type="password" class="form-control form-control-lg rounded-0" id="password" name="password" required="" autocomplete="new-password" />
+                  <div class="invalid-feedback">Enter your password too!</div>
+                </div>
+                <div class="form-group">
+                  <label for="authentication_code">Authentication Code:</label>
+                  <div class="input-group">
+                    <input type="text" class="form-control form-control-lg rounded-0" name="authentication_code" id="authentication_code" required="" />
+                    <div class="input-group-append">
+                      <button type="button" class="btn btn-primary" id="btnRequestCode">Request Code</button>
+                    </div>
+                  </div>
+                  <div class="invalid-feedback">Enter the authentication code received in the message.</div>
+                </div>
+                <button type="submit" class="btn btn-success btn-lg float-right" id="btnLogin">Login</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- 저작권 정보 footer 추가 -->
+    <footer class="text-center mt-4">
+      <p>&copy; 2023 RealtySync Systems. All Rights Reserved. Version 1.0</p>
+    </footer>
+    <!-- <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script> -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+      $(document).ready(function () {
+        // Handle the button click event
+        $("#btnRequestCode").click(function () {
+          // Get the user ID and password from the input fields
+          var userId = $("#userid").val();
+          var password = $("#password").val();
+          console.log(userId, password);
+
+          // Send a request to the server to request the authentication code
+          $.ajax({
+            type: "POST",
+            url: "/request_code", // Update the URL to match your Flask route, request_code
+            data: {
+              userid: userId,
+              password: password,
+            },
+            success: function (data) {
+              // Handle the response from the server (e.g., show a success message)
+              alert("인증번호를 전송했습니다.");
+            },
+            error: function (error) {
+              // Handle any errors (e.g., display an error message)
+              alert("인증번호를 전송하지 못했습니다.\nUser ID, Password를 확인하세요.");
+            },
+          });
+        });
+      });
+    </script>
+  </body>
+</html>
+
+<!-- Add this code in your login.html template where you want to display messages -->
+{% with messages = get_flashed_messages() %} {% if messages %}
+<div class="alert alert-danger">
+  <ul class="mb-0">
+    {% for message in messages %}
+    <li>{{ message }}</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endif %} {% endwith %}

@@ -1,8 +1,12 @@
 import sqlite3
 from flask import Flask, render_template, request, redirect, url_for, session, flash, Response, jsonify
 import logging
-import datetime
-from config import *
+import datetime, time
+# from datetime import datetime
+# from module.etc_util import printL, mode_check, tele_push_admin
+from config import *    # 허용하는 도메인 리스트 (config.py)
+import telegram
+import asyncio, json
 # import json
 
 flag=True
@@ -35,14 +39,30 @@ def query_database_update(query):
     cursor.close()
     conn.close()
 
+# telegram 메세지 발송함수
+async def tele_push(userid, authcode): #텔레그램 발송용 함수
+    # AUTH_TOKEN = config.py 처리
+    # ------------------------------------
+    logging.debug(f'{userid}, {authcode}')
+    query = f'SELECT chat_id from account WHERE userid = "{userid}"'
+    chat_id = query_database(query)[0][0]
+    logging.debug(chat_id)
+    content = f"인증코드 : [[{authcode}]]"
+    # current_time = datetime.datetime.now()
+    # formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
+    bot = telegram.Bot(token = AUTH_TOKEN)
+    await bot.send_message(chat_id, content, parse_mode = 'Markdown', disable_web_page_preview=True)
+
 @app.route('/')
 def index():
-    return render_template('login3.html')
+    return render_template('login4.html')
 
 @app.route('/login', methods=['POST'])
 def login():
     userid = request.form['userid']
     password = request.form['password']
+    authcode_input = request.form['authentication_code']
+    logging.debug(f'authcode = {authcode_input}')
     
     conn = sqlite3.connect(DATABASE)  # Connect to your SQLite database
     cursor = conn.cursor()
@@ -50,28 +70,100 @@ def login():
     user = cursor.fetchone()
 
     if user:    # 로그인 성공
-        session['userid'] = user[0]  # Store user ID in session
-        # ------ last_login, login_count UPDATE 처리 -------- #
         # 날짜 (오늘)
         current_time = datetime.datetime.now()
         last_login = current_time.strftime("%Y-%m-%d %H:%M:%S")
-        if user[11] is None or user[11] == "":  # 기존 login_count 컬럼 확인
-            before_login_count = 0
-        else:
-            before_login_count = int(user[11])
-        login_count = before_login_count + 1
-        logging.debug(f"Login Success. last({last_login}), cnt:{login_count}, userid:{session['userid']}")
-        cursor.execute("UPDATE account SET last_login = ?, login_count = ? WHERE userid = ?", (last_login, login_count, session['userid']))
-        conn.commit()
-        cursor.close()
-        conn.close()
-        return redirect(url_for('display_land_items'))
+
+        # 인증번호 정상여부 확인 (입력받은 값과 DB 값 비교.)
+        query = f'SELECT auth_code, auth_date from account WHERE userid = "{userid}"'
+        authcode_db = query_database(query)[0][0]
+        auth_date = query_database(query)[0][1]
+        logging.debug(f'[DB]auth_code = {authcode_db}')
+        logging.debug(f'[DB]auth_date = {auth_date}')
+
+        if authcode_input == authcode_db:   # 인증번호가 일치하고
+            # 인증후 로그인까지 시간차 구하기
+            datetime_A = datetime.datetime.strptime(auth_date, '%Y-%m-%d %H:%M:%S')
+            datetime_B = datetime.datetime.strptime(last_login, '%Y-%m-%d %H:%M:%S')
+            time_difference = datetime_B - datetime_A
+            seconds_difference = time_difference.total_seconds()    # 시간차이를 초로 변환
+            logging.debug(f'인증후 로그인까지 걸린시간(초) : {seconds_difference}')
+            
+            if seconds_difference < 180:     # 인증시간이 초과되지 않았을때 (3분)
+                ok_auth = True
+                # DB 에 결과 update
+                query = f'UPDATE account SET auth_code = "PASS" WHERE userid = "{userid}"'
+                query_database_update(query)
+            else:
+                ok_auth = False
+                logging.debug(f"인증시간이 초과되었습니다. {seconds_difference}초")
+                flash(f'Authentication timeout({seconds_difference}s). [MAX:3min] Please try again.', 'error')
+                logging.error(f"Authentication timeout({seconds_difference}s). Please try again.")
+                cursor.close()
+                conn.close()
+                return redirect(url_for('index'))
+        else:   # 인증번호가 틀렸을때
+            ok_auth = False
+            # DB 에 결과 update
+            query = f'UPDATE account SET auth_code = "FAIL" WHERE userid = "{userid}"'
+            query_database_update(query)
+
+        if ok_auth:     # 인증번호 확인 결과 정상일때
+            session['userid'] = user[0]  # Store user ID in session
+            # session['auth_code'] = 'True' # 굳이 불필요한듯.
+            # ------ last_login, login_count UPDATE 처리 -------- #
+            if user[11] is None or user[11] == "":  # 기존 login_count 컬럼 확인
+                before_login_count = 0
+            else:
+                before_login_count = int(user[11])
+            login_count = before_login_count + 1
+            logging.debug(f"Login Success. last({last_login}), cnt:{login_count}, userid:{session['userid']}")
+            cursor.execute("UPDATE account SET last_login = ?, login_count = ? WHERE userid = ?", (last_login, login_count, session['userid']))
+            conn.commit()
+            cursor.close()
+            conn.close()
+            return redirect(url_for('display_land_items'))
+        else:       # 인증번호 확인 결과 실패일때
+            flash(f'Invalid authentication code({authcode_input}). Please try again.', 'error')
+            logging.error(f"Invalid authentication code. Please try again.({userid}/{password})")
+            cursor.close()
+            conn.close()
+            return redirect(url_for('index'))
     else:   # 로그인 실패
         flash('Invalid user ID or password. Please try again.', 'error')
         logging.error(f"Invalid user ID or password. Please try again.({userid}/{password})")
         cursor.close()
         conn.close()
         return redirect(url_for('index'))
+
+@app.route('/request_code', methods=['POST'])
+def request_code():     # 인증코드 요청하는 부분 (텔레그램)
+    logging.debug('------')
+    logging.debug('request_code !!!')
+    userid = request.form['userid']
+    password = request.form['password']
+    logging.debug(f'입력된값 : {userid}, {password}')
+    # 날짜 (오늘)
+    current_time = datetime.datetime.now()
+    auth_date = current_time.strftime("%Y-%m-%d %H:%M:%S")
+    
+    query = f'SELECT count(*) FROM account WHERE userid = "{userid}" AND password = "{password}" AND available = "1"'
+    idpwd_check = query_database(query)[0][0]
+    # logging.debug(idpwd_check)
+    if idpwd_check == 1:    # ID,PW 가 맞고 해당 유저가 유효할 경우
+        import random
+        authentication_code = str(random.randint(1000, 9999))
+        # 텔레그램에 메세지 전송
+        asyncio.run(tele_push(userid, authentication_code)) #텔레그램 발송 (asyncio를 이용해야 함)
+
+        # DB 에 update 처리
+        query = f'UPDATE account SET auth_code = {authentication_code}, auth_date = "{auth_date}" WHERE userid = "{userid}"'
+        query_database_update(query)
+    else:
+        query = f'UPDATE account SET auth_code = "BLOCK", auth_date = "{auth_date}" WHERE userid = "{userid}"'
+        query_database_update(query)
+
+    return authentication_code
 
 @app.route('/logout')
 def logout():
@@ -170,7 +262,8 @@ def display_message_list():     # 메세지 발송내역 리스트 (결과확인
 @app.route('/adm/account')
 def display_account():      # 계정 리스트
     if admin_check(session['userid']):
-        query = f'SELECT userid, username, admin, available, reg_date, type, location, memo, expire_date, last_login, login_count, chat_id FROM account ORDER BY admin desc,login_count desc;'
+        # query = f'SELECT userid, username, admin, available, reg_date, type, location, memo, expire_date, last_login, login_count, chat_id FROM account ORDER BY admin desc,login_count desc;'
+        query = f'SELECT userid, username, admin, available, reg_date, memo, last_login, login_count, auth_code, auth_date, chat_id FROM account ORDER BY admin desc,login_count desc;'
         items = query_database(query)
         userid = session['userid']
         # return render_template('account1.html', items=items)
@@ -255,7 +348,7 @@ def update_password():
 
 @app.before_request
 def require_login():    # 로그인 여부 체크
-    allowed_routes = ['index', 'login', 'logout', 'static']
+    allowed_routes = ['index', 'login', 'logout', 'static', 'request_code']
     # print(request.endpoint)
     # print(session.get('userid'))
     if request.endpoint not in allowed_routes and 'userid' not in session:
