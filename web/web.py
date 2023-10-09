@@ -46,7 +46,7 @@ async def tele_push(userid, authcode): #텔레그램 발송용 함수
     logging.debug(f'{userid}, {authcode}')
     query = f'SELECT chat_id from account WHERE userid = "{userid}"'
     chat_id = query_database(query)[0][0]
-    logging.debug(chat_id)
+    logging.debug(f'userid : {userid}, chat_id :{chat_id}')
     content = f"인증코드 : [[{authcode}]]"
     # current_time = datetime.datetime.now()
     # formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
@@ -62,7 +62,7 @@ def login():
     userid = request.form['userid']
     password = request.form['password']
     authcode_input = request.form['authentication_code']
-    logging.debug(f'authcode = {authcode_input}')
+    logging.debug(f'userid : {userid}, authcode = {authcode_input}')
     
     conn = sqlite3.connect(DATABASE)  # Connect to your SQLite database
     cursor = conn.cursor()
@@ -78,8 +78,8 @@ def login():
         query = f'SELECT auth_code, auth_date from account WHERE userid = "{userid}"'
         authcode_db = query_database(query)[0][0]
         auth_date = query_database(query)[0][1]
-        logging.debug(f'[DB]auth_code = {authcode_db}')
-        logging.debug(f'[DB]auth_date = {auth_date}')
+        logging.debug(f'userid : {userid}, [DB]auth_code = {authcode_db}')
+        logging.debug(f'userid : {userid}, [DB]auth_date = {auth_date}')
 
         if authcode_input == authcode_db:   # 인증번호가 일치하고
             # 인증후 로그인까지 시간차 구하기
@@ -87,7 +87,7 @@ def login():
             datetime_B = datetime.datetime.strptime(last_login, '%Y-%m-%d %H:%M:%S')
             time_difference = datetime_B - datetime_A
             seconds_difference = time_difference.total_seconds()    # 시간차이를 초로 변환
-            logging.debug(f'인증후 로그인까지 걸린시간(초) : {seconds_difference}')
+            logging.debug(f'userid : {userid}, 인증후 로그인까지 걸린시간(초) : {seconds_difference}')
             
             if seconds_difference < 180:     # 인증시간이 초과되지 않았을때 (3분)
                 ok_auth = True
@@ -96,7 +96,7 @@ def login():
                 query_database_update(query)
             else:
                 ok_auth = False
-                logging.debug(f"인증시간이 초과되었습니다. {seconds_difference}초")
+                logging.debug(f"userid : {userid}, 인증시간이 초과되었습니다. {seconds_difference}초")
                 flash(f'Authentication timeout({seconds_difference}s). [MAX:3min] Please try again.', 'error')
                 logging.error(f"Authentication timeout({seconds_difference}s). Please try again.")
                 cursor.close()
@@ -138,8 +138,6 @@ def login():
 
 @app.route('/request_code', methods=['POST'])
 def request_code():     # 인증코드 요청하는 부분 (텔레그램)
-    logging.debug('------')
-    logging.debug('request_code !!!')
     userid = request.form['userid']
     password = request.form['password']
     logging.debug(f'입력된값 : {userid}, {password}')
