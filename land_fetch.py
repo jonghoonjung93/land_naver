@@ -361,7 +361,12 @@ def send_lists(lands):	# 전일자와 비교해서 현재 새로운 매물리스
 			# global global_err
 			global_err = global_err + 1
 			printL(f"{land} : ERROR! land_naver 알수없는 에러. count({global_err}), err({e})")
-			# 여기서 실패건에 대해서 파일에 쌓아놓고 재처리를 위한 준비 필요.
+			# 여기서 실패건에 대해서 파일에 쌓아놓고 재처리를 위한 준비 ------------
+			error_list_file = "land_fetch_retry.sh"
+			with open(error_list_file, "a") as log_file:
+				log_file.write(f"/usr/bin/python3 land_fetch.py {land}\n")
+			printL(f"{land} : land_fetch_errList.txt 파일에 기록 완료")
+			#---------------------------------------------------------
 			continue
 		else:	# 정상완료시
 			# print(len(lists))
