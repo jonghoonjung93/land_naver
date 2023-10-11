@@ -43,7 +43,7 @@ def query_database_update(query):
 async def tele_push(userid, authcode): #텔레그램 발송용 함수
     # AUTH_TOKEN = config.py 처리
     # ------------------------------------
-    logging.debug(f'{userid}, {authcode}')
+    logging.debug(f'telegram send : {userid}, {authcode}')
     query = f'SELECT chat_id from account WHERE userid = "{userid}"'
     chat_id = query_database(query)[0][0]
     logging.debug(f'userid : {userid}, chat_id :{chat_id}')
@@ -118,6 +118,8 @@ def login():
                 before_login_count = int(user[11])
             login_count = before_login_count + 1
             logging.debug(f"Login Success. last({last_login}), cnt:{login_count}, userid:{session['userid']}")
+            # 텔레그램에 메세지 전송
+            asyncio.run(tele_push('tiptop', f'Login : {userid}')) #텔레그램 발송 (asyncio를 이용해야 함)
             cursor.execute("UPDATE account SET last_login = ?, login_count = ? WHERE userid = ?", (last_login, login_count, session['userid']))
             conn.commit()
             cursor.close()
