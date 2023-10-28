@@ -178,8 +178,30 @@ def display_land_items():   # 전체 매물리스트
     # 날짜 (오늘)
     current_time = datetime.datetime.now()
     formatted_date = current_time.strftime("%Y%m%d")
-    formatted_date2 = current_time.strftime("%Y.%m.%d")
-    # formatted_date = '20230722'
+    today = current_time.strftime("%Y.%m.%d")
+
+    tmp_date1 = current_time - datetime.timedelta(days=1)
+    one_day_ago = tmp_date1.strftime("%Y.%m.%d")
+    tmp_date2 = current_time - datetime.timedelta(days=2)
+    two_day_ago = tmp_date2.strftime("%Y.%m.%d")
+    tmp_date3 = current_time - datetime.timedelta(days=3)
+    three_day_ago = tmp_date3.strftime("%Y.%m.%d")
+
+    # logging.debug(f"day_ago : {one_day_ago} {two_day_ago} {three_day_ago}")
+    arg_date = request.args.get('date', formatted_date) # argument 날짜 받아오고 없으면 당일자로 
+    # logging.debug(f"arg_date : {arg_date}")
+
+    if arg_date == formatted_date:  # 당일일 경우
+        formatted_date = current_time.strftime("%Y%m%d")
+    elif arg_date == one_day_ago:   # 전일
+        formatted_date = "20231027"
+    elif arg_date == two_day_ago:   # 2일전
+        formatted_date = "20231026"
+    elif arg_date == three_day_ago: # 3일전
+        formatted_date = "20231025"
+
+    # logging.debug(f"formatted_date : {formatted_date}")
+    # logging.debug(f"today : {today}")
     
     # Get the value of the checkbox (True if checked, False if not)
     rm_dup = request.args.get('rm_dup', False)
@@ -198,11 +220,11 @@ def display_land_items():   # 전체 매물리스트
     items = query_database(query)
 
     userid = session['userid']
-    query = f'SELECT line FROM account WHERE userid = "{userid}"'
-    line = query_database(query)
+    # query = f'SELECT line FROM account WHERE userid = "{userid}"'
+    # line = query_database(query)
     # logging.debug(f'line = {line[0][0]}')
 
-    return render_template('land_item5.html', items=items, userid=userid, today=formatted_date2, line=line[0][0])
+    return render_template('land_item7.html', items=items, userid=userid, today=today, one_day_ago=one_day_ago, two_day_ago=two_day_ago, three_day_ago=three_day_ago)
 
 @app.route('/new')
 def display_land_items_new():   # 금일 신규 매물리스트
@@ -212,8 +234,30 @@ def display_land_items_new():   # 금일 신규 매물리스트
     # 날짜 (오늘)
     current_time = datetime.datetime.now()
     formatted_date = current_time.strftime("%Y%m%d")
-    formatted_date2 = current_time.strftime("%Y.%m.%d")
-    # formatted_date = '20230722'
+    today = current_time.strftime("%Y.%m.%d")
+
+    tmp_date1 = current_time - datetime.timedelta(days=1)
+    one_day_ago = tmp_date1.strftime("%Y.%m.%d")
+    tmp_date2 = current_time - datetime.timedelta(days=2)
+    two_day_ago = tmp_date2.strftime("%Y.%m.%d")
+    tmp_date3 = current_time - datetime.timedelta(days=3)
+    three_day_ago = tmp_date3.strftime("%Y.%m.%d")
+
+    # logging.debug(f"day_ago : {one_day_ago} {two_day_ago} {three_day_ago}")
+    arg_date = request.args.get('date', formatted_date) # argument 날짜 받아오고 없으면 당일자로 
+    # logging.debug(f"arg_date : {arg_date}")
+
+    if arg_date == formatted_date:  # 당일일 경우
+        formatted_date = current_time.strftime("%Y%m%d")
+    elif arg_date == one_day_ago:   # 전일
+        formatted_date = "20231027"
+    elif arg_date == two_day_ago:   # 2일전
+        formatted_date = "20231026"
+    elif arg_date == three_day_ago: # 3일전
+        formatted_date = "20231025"
+
+    # logging.debug(f"formatted_date : {formatted_date}")
+    # logging.debug(f"today : {today}")
 
     # Get the value of the checkbox (True if checked, False if not)
     rm_dup = request.args.get('rm_dup', False)
@@ -232,11 +276,12 @@ def display_land_items_new():   # 금일 신규 매물리스트
     items = query_database(query)
     
     userid = session['userid']
-    query = f'SELECT line FROM account WHERE userid = "{userid}"'
-    line = query_database(query)
+    # query = f'SELECT line FROM account WHERE userid = "{userid}"'
+    # line = query_database(query)
     # logging.debug(f'line = {line[0][0]}')
     
-    return render_template('land_item5.html', items=items, userid=userid, today=formatted_date2, line=line[0][0])
+    # return render_template('land_item5.html', items=items, userid=userid, today=formatted_date2, line=line[0][0])
+    return render_template('land_item7.html', items=items, userid=userid, today=today, one_day_ago=one_day_ago, two_day_ago=two_day_ago, three_day_ago=three_day_ago)
 
 def admin_check(userid):    # 관리자 여부 체크
     query = f'SELECT admin FROM account WHERE userid = "{userid}"'
@@ -345,6 +390,15 @@ def update_password():
         }
         # return jsonify(error='Password update failed due to validation errors')
         return jsonify(response_data)
+
+@app.route('/save_ip', methods=['POST'])
+def save_ip():
+    data = request.get_json()
+    public_ip = data.get('ip')
+    userid = session['userid']
+    logging.debug(f'userid : {userid}, 공인IP : {public_ip}')
+    
+    return jsonify({'message': 'IP address received successfully'})
 
 @app.before_request
 def require_login():    # 로그인 여부 체크

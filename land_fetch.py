@@ -168,7 +168,7 @@ def land_naver(building):
 	today = current_time.date()
 	yesterday_form = today - timedelta(days=1)
 	yesterday = yesterday_form.strftime("%Y%m%d")
-	delete_day_form = today - timedelta(days=3)	# 삭제대상, 3일전 데이터는 삭제처리
+	delete_day_form = today - timedelta(days=5)	# 삭제대상, 3일전 데이터는 삭제처리
 	delete_day = delete_day_form.strftime("%Y%m%d")
 
 	# DB 접속
