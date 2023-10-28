@@ -179,13 +179,22 @@ def display_land_items():   # 전체 매물리스트
     current_time = datetime.datetime.now()
     formatted_date = current_time.strftime("%Y%m%d")
     today = current_time.strftime("%Y.%m.%d")
+    # today_week = current_time.strftime("%A")    # 요일
+    # today_week = current_time.weekday()
+    today_week = '월화수목금토일'[current_time.weekday()]
 
     tmp_date1 = current_time - datetime.timedelta(days=1)
     one_day_ago = tmp_date1.strftime("%Y.%m.%d")
+    # one_day_week = tmp_date1.strftime("%A")
+    one_day_week = '월화수목금토일'[tmp_date1.weekday()]
     tmp_date2 = current_time - datetime.timedelta(days=2)
     two_day_ago = tmp_date2.strftime("%Y.%m.%d")
+    # two_day_week = tmp_date2.strftime("%A")
+    two_day_week = '월화수목금토일'[tmp_date2.weekday()]
     tmp_date3 = current_time - datetime.timedelta(days=3)
     three_day_ago = tmp_date3.strftime("%Y.%m.%d")
+    # three_day_week = tmp_date3.strftime("%A")
+    three_day_week = '월화수목금토일'[tmp_date3.weekday()]
 
     # logging.debug(f"day_ago : {one_day_ago} {two_day_ago} {three_day_ago}")
     arg_date = request.args.get('date', formatted_date) # argument 날짜 받아오고 없으면 당일자로 
@@ -224,7 +233,7 @@ def display_land_items():   # 전체 매물리스트
     # line = query_database(query)
     # logging.debug(f'line = {line[0][0]}')
 
-    return render_template('land_item7.html', items=items, userid=userid, today=today, one_day_ago=one_day_ago, two_day_ago=two_day_ago, three_day_ago=three_day_ago)
+    return render_template('land_item7.html', items=items, userid=userid, today=today, today_week=today_week, one_day_ago=one_day_ago, one_day_week=one_day_week, two_day_ago=two_day_ago, two_day_week=two_day_week, three_day_ago=three_day_ago, three_day_week=three_day_week)
 
 @app.route('/new')
 def display_land_items_new():   # 금일 신규 매물리스트
@@ -235,13 +244,22 @@ def display_land_items_new():   # 금일 신규 매물리스트
     current_time = datetime.datetime.now()
     formatted_date = current_time.strftime("%Y%m%d")
     today = current_time.strftime("%Y.%m.%d")
+    # today_week = current_time.strftime("%A")    # 요일
+    # today_week = current_time.weekday()
+    today_week = '월화수목금토일'[current_time.weekday()]
 
     tmp_date1 = current_time - datetime.timedelta(days=1)
     one_day_ago = tmp_date1.strftime("%Y.%m.%d")
+    # one_day_week = tmp_date1.strftime("%A")
+    one_day_week = '월화수목금토일'[tmp_date1.weekday()]
     tmp_date2 = current_time - datetime.timedelta(days=2)
     two_day_ago = tmp_date2.strftime("%Y.%m.%d")
+    # two_day_week = tmp_date2.strftime("%A")
+    two_day_week = '월화수목금토일'[tmp_date2.weekday()]
     tmp_date3 = current_time - datetime.timedelta(days=3)
     three_day_ago = tmp_date3.strftime("%Y.%m.%d")
+    # three_day_week = tmp_date3.strftime("%A")
+    three_day_week = '월화수목금토일'[tmp_date3.weekday()]
 
     # logging.debug(f"day_ago : {one_day_ago} {two_day_ago} {three_day_ago}")
     arg_date = request.args.get('date', formatted_date) # argument 날짜 받아오고 없으면 당일자로 
@@ -281,7 +299,7 @@ def display_land_items_new():   # 금일 신규 매물리스트
     # logging.debug(f'line = {line[0][0]}')
     
     # return render_template('land_item5.html', items=items, userid=userid, today=formatted_date2, line=line[0][0])
-    return render_template('land_item7.html', items=items, userid=userid, today=today, one_day_ago=one_day_ago, two_day_ago=two_day_ago, three_day_ago=three_day_ago)
+    return render_template('land_item7.html', items=items, userid=userid, today=today, today_week=today_week, one_day_ago=one_day_ago, one_day_week=one_day_week, two_day_ago=two_day_ago, two_day_week=two_day_week, three_day_ago=three_day_ago, three_day_week=three_day_week)
 
 def admin_check(userid):    # 관리자 여부 체크
     query = f'SELECT admin FROM account WHERE userid = "{userid}"'
