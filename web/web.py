@@ -194,11 +194,11 @@ def display_land_items():   # 전체 매물리스트
     if arg_date == formatted_date:  # 당일일 경우
         formatted_date = current_time.strftime("%Y%m%d")
     elif arg_date == one_day_ago:   # 전일
-        formatted_date = "20231027"
+        formatted_date = one_day_ago.replace(".","")
     elif arg_date == two_day_ago:   # 2일전
-        formatted_date = "20231026"
+        formatted_date = two_day_ago.replace(".","")
     elif arg_date == three_day_ago: # 3일전
-        formatted_date = "20231025"
+        formatted_date = three_day_ago.replace(".","")
 
     # logging.debug(f"formatted_date : {formatted_date}")
     # logging.debug(f"today : {today}")
@@ -250,11 +250,11 @@ def display_land_items_new():   # 금일 신규 매물리스트
     if arg_date == formatted_date:  # 당일일 경우
         formatted_date = current_time.strftime("%Y%m%d")
     elif arg_date == one_day_ago:   # 전일
-        formatted_date = "20231027"
+        formatted_date = one_day_ago.replace(".","")
     elif arg_date == two_day_ago:   # 2일전
-        formatted_date = "20231026"
+        formatted_date = two_day_ago.replace(".","")
     elif arg_date == three_day_ago: # 3일전
-        formatted_date = "20231025"
+        formatted_date = three_day_ago.replace(".","")
 
     # logging.debug(f"formatted_date : {formatted_date}")
     # logging.debug(f"today : {today}")
