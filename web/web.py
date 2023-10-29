@@ -6,7 +6,7 @@ import datetime, time
 # from module.etc_util import printL, mode_check, tele_push_admin
 from config import *    # 허용하는 도메인 리스트 (config.py)
 import telegram
-import asyncio, json
+import asyncio, json, os
 # import json
 
 flag=True
@@ -413,8 +413,20 @@ def update_password():
 def save_ip():
     data = request.get_json()
     public_ip = data.get('ip')
+    url = data.get('url')
     userid = session['userid']
-    logging.debug(f'userid : {userid}, 공인IP : {public_ip}')
+    logging.debug(f'userid : {userid}, 공인IP : {public_ip}, url : {url}')
+    
+    flag=True
+    if flag:    # access 로그 작성
+        log_directory = "../logs"
+        current_date = datetime.datetime.now().strftime("%Y%m%d")
+        log_path = os.path.join(log_directory, f"access.log.{current_date}")
+        current_time = datetime.datetime.now()
+        formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
+
+        with open(log_path, "a") as log_file:
+            log_file.write(f"{formatted_time} [{userid}]\t{public_ip}\t{url}\n")
     
     return jsonify({'message': 'IP address received successfully'})
 
