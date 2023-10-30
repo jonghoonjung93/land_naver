@@ -309,7 +309,8 @@
     <script>  // 공인ip server로 전달
       // Function to get the public IP address
       function getPublicIP(callback) {
-          fetch('http://ip-api.com/json/')
+          // fetch('http://ip-api.com/json/')
+          fetch('http://ip-api.com/json/?fields=61439')
               .then(response => response.json())
               .then(data => {
                 // console.log("Your public IP address: " + data.query);
@@ -330,6 +331,7 @@
                   'Content-Type': 'application/json',
               },
               body: JSON.stringify({ ip: publicIP, url: currentURL }), // Include URL in the data
+              mode: 'cors' // Add this line to specify CORS mode
           })
               .then(response => response.json())
               .then(data => {

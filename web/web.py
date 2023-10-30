@@ -8,11 +8,16 @@ from config import *    # 허용하는 도메인 리스트 (config.py)
 import telegram
 import asyncio, json, os
 # import json
+from flask_cors import CORS
 
 flag=True
 if flag:
     app = Flask(__name__)
     app.secret_key = 'my_secret_key'
+    # CORS(app)  # 모든 엔드포인트에서 CORS 활성화
+    # cors = CORS(app, resources={r"/save_ip": {"origins": "http://land.iptime.org"}})
+    # cors = CORS(app, resources={r"/save_ip": {"origins": "http://127.0.0.1:5200"}})
+    cors = CORS(app, resources={r"/save_ip": {"origins": "*"}})
 
     # ALLOWED_DOMAINS = ["xxx.xxx.xxx", "127.0.0.1"]    # 실제 데이터는 config.py 에서 별도로 처리
 
