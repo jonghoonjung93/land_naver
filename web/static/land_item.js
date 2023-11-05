@@ -1,3 +1,10 @@
+// ID 클릭시 비밀번호 변경페이지 이동
+$(document).ready(function () {
+  $("#userid").click(function () {
+    window.location.href = "/myinfo";
+  });
+});
+
 //중복 제거 체크박스 기능을 위한 스크립트
 // Function to set a cookie with the checkbox state
 function setCheckboxState(value) {

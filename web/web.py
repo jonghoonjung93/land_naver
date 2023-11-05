@@ -416,7 +416,9 @@ def update_password():
 
 @app.route('/save_ip', methods=['POST'])
 def save_ip():
+    # logging.debug("------------------save_ip-----------------")
     data = request.get_json()
+    # logging.debug(data)
     public_ip = data.get('ip')
     url = data.get('url')
     userid = session['userid']

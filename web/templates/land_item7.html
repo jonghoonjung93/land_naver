@@ -130,7 +130,8 @@
     </footer> -->
 
     <!-- Link to jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> -->
+    <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
 
     <!-- Link to Bootstrap JS -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
@@ -142,6 +143,7 @@
 
     <script>
       // var line = "{{ line }}";
+
       $(document).ready(function () {
         $("#landItemsTable").DataTable({
           pageLength: 15, // Set the number of rows displayed per page
@@ -150,22 +152,18 @@
           // pageLength: line, // Set the number of rows displayed per page
           lengthMenu: [10, 15, 20, 30, 40, 50, 100, 200, 500], // Set the custom options for the entry display part
           columnDefs: [
-            // { targets: [4, 5], orderable: false }, // Disable sorting for the "금액" column (index 5)
-            { targets: [7], orderable: false }, // Disable sorting for the "금액" column (index 5)
+            // { targets: [4, 5], orderable: false }, // Disable sorting for the column (index 4,5)
+            { targets: [7], orderable: false }, // Disable sorting for the column (index 7)
           ],
           // ordering: false, // Disable sorting for the entire table
           // searching: false,
+          // info: false,
         });
       });
 
-      $(document).ready(function() {
-        $("#userid").click(function() {
-          window.location.href = "/myinfo";
-        });
-      });
-      $(document).ready(function () {
-        $('[data-toggle="tooltip"]').tooltip();
-      });
+      // $(document).ready(function () {
+      //   $('[data-toggle="tooltip"]').tooltip();
+      // });
     </script>
 
     <script src="/static/land_item.js"></script>
