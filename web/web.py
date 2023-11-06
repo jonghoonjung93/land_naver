@@ -421,7 +421,10 @@ def save_ip():
     # logging.debug(data)
     public_ip = data.get('ip')
     url = data.get('url')
-    userid = session['userid']
+    try:
+        userid = session['userid']
+    except: # 로그인이 안된 상태에서의 로그 기록을 위해
+        userid = "None"
     logging.debug(f'userid : {userid}, 공인IP : {public_ip}, url : {url}')
     
     flag=True
@@ -439,7 +442,7 @@ def save_ip():
 
 @app.before_request
 def require_login():    # 로그인 여부 체크
-    allowed_routes = ['index', 'login', 'logout', 'static', 'request_code']
+    allowed_routes = ['index', 'login', 'logout', 'static', 'request_code', 'save_ip']  # 이것들은 로그인이 안되어있어도 정상 작동됨
     # print(request.endpoint)
     # print(session.get('userid'))
     if request.endpoint not in allowed_routes and 'userid' not in session:
