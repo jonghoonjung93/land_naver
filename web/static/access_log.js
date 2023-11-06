@@ -7,10 +7,19 @@ function getCurrentURL() {
 function getPublicIP(callback) {
   // fetch('http://ip-api.com/json/')
   fetch("http://ip-api.com/json/?fields=61439")
-    .then((response) => response.json())
+    // .then(function(response){
+    //   console.log('response', response);
+    //   return response.json();
+    // })
+    .then((response) => response.json()) // 위의 주석 줄인게 이거 한줄. response.json 도 promise 라서 성공시 아래 then을 호출
+    // .then(function(data) {
+    //   console.log('data', data);
+    // })
     .then((data) => {
+      // promise chanining
       // console.log("Your public IP address: " + data.query);
       // console.log("Your url: " + getCurrentURL());
+      // console.log('data', data);
       callback(data.query, getCurrentURL()); // Pass both IP and URL to the callback);
     })
     .catch((error) => {
