@@ -65,15 +65,28 @@
         <table class="table table-striped table-bordered" id="landItemsTable">
           <thead>
             <tr>
-              <th>count</th>
-              <th>agent_name</th>
+              <th style="white-space: nowrap">매물수</th>
+              <th style="white-space: nowrap">중개사사무소</th>
+              <th style="white-space: nowrap">변화</th>
+              <th style="white-space: nowrap">출처</th>
+              <th style="white-space: nowrap">대표</th>
+              <th style="white-space: nowrap">주소</th>
+              <th style="white-space: nowrap">전화번호</th>
             </tr>
           </thead>
           <tbody>
             {% for item in items %}
             <tr>
-              <td style="font-size: 14px" nowrap>{{ item[0] }}</td>
+              <!-- agent_name, count, chg, link, owner, address, tel1 -->
               <td style="font-size: 14px" nowrap>{{ item[1] }}</td>
+              <td style="font-size: 14px" nowrap>{{ item[0] }}</td>
+              <td style="font-size: 14px" nowrap>{{ item[2] }}</td>
+              <td>
+                <a href="{{ item[3] }}" target="_blank" class="btn btn-primary custom-link-button">Link</a>
+              </td>
+              <td style="font-size: 14px" nowrap>{{ item[4] }}</td>
+              <td style="font-size: 14px" nowrap>{{ item[5] }}</td>
+              <td style="font-size: 14px" nowrap>{{ item[6] }}</td>
             </tr>
             {% endfor %}
           </tbody>
@@ -97,7 +110,7 @@
     <script>
       $(document).ready(function () {
         $("#landItemsTable").DataTable({
-          pageLength: 20, // Set the number of rows displayed per page
+          pageLength: 15, // Set the number of rows displayed per page
           lengthMenu: [10, 15, 20, 30, 40, 50, 100], // Set the custom options for the entry display part
           columnDefs: [
             { targets: [1], orderable: false }, // Disable sorting for the "금액" column (index 5)

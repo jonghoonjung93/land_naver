@@ -406,7 +406,8 @@ def display_ranking():      # 중개사무소별 랭킹
         # 날짜 (오늘)
         current_time = datetime.datetime.now()
         formatted_date = current_time.strftime("%Y%m%d")
-        query = f'SELECT count(*), agent_name FROM land_item WHERE date = "{formatted_date}" GROUP BY agent_name ORDER BY 1 desc;'
+        # query = f'SELECT count(*), agent_name FROM land_item WHERE date = "{formatted_date}" GROUP BY agent_name ORDER BY 1 desc;'
+        query = f'SELECT agent_name, count, chg, link, owner, address, tel1 FROM agent WHERE date = "{formatted_date}" ORDER BY count desc;'
         items = query_database(query)
         userid = session['userid']
         # return render_template('account1.html', items=items)
