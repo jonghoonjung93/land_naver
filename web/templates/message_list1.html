@@ -46,8 +46,9 @@
     <div class="container-fluid mt-5">
       <div class="header-buttons d-flex justify-content-between">
         <div class="d-flex justify-content-start">
-          <a href="/adm/account" class="btn btn-primary mr-2 {% if request.path == '/adm/account' %}active{% endif %}">account</a>
-          <a href="/adm/message" class="btn btn-primary {% if request.path == '/adm/message' %}active{% endif %}">message</a>
+          <a href="/adm/account" class="btn btn-primary mr-1 {% if request.path == '/adm/account' %}active{% endif %}">account</a>
+          <a href="/adm/message" class="btn btn-primary mr-1 {% if request.path == '/adm/message' %}active{% endif %}">message</a>
+          <a href="/adm/ranking" class="btn btn-primary {% if request.path == '/adm/ranking' %}active{% endif %}">ranking</a>
         </div>
         <div class="d-flex justify-content-center">
           <h5>관리자 모드 : message</h5>

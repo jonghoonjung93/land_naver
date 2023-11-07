@@ -306,6 +306,67 @@ def display_land_items_new():   # 금일 신규 매물리스트
     # return render_template('land_item5.html', items=items, userid=userid, today=formatted_date2, line=line[0][0])
     return render_template('land_item7.html', items=items, userid=userid, today=today, today_week=today_week, one_day_ago=one_day_ago, one_day_week=one_day_week, two_day_ago=two_day_ago, two_day_week=two_day_week, three_day_ago=three_day_ago, three_day_week=three_day_week)
 
+@app.route('/my')
+def display_land_items_my():   # 금일 신규 매물리스트
+    # Logging the access request
+    # app.logger.info(f'Access: {request.method} {request.url}')
+
+    # 날짜 (오늘)
+    current_time = datetime.datetime.now()
+    formatted_date = current_time.strftime("%Y%m%d")
+    today = current_time.strftime("%Y.%m.%d")
+    # today_week = current_time.strftime("%A")    # 요일
+    # today_week = current_time.weekday()
+    today_week = '월화수목금토일'[current_time.weekday()]
+
+    tmp_date1 = current_time - datetime.timedelta(days=1)
+    one_day_ago = tmp_date1.strftime("%Y.%m.%d")
+    # one_day_week = tmp_date1.strftime("%A")
+    one_day_week = '월화수목금토일'[tmp_date1.weekday()]
+    tmp_date2 = current_time - datetime.timedelta(days=2)
+    two_day_ago = tmp_date2.strftime("%Y.%m.%d")
+    # two_day_week = tmp_date2.strftime("%A")
+    two_day_week = '월화수목금토일'[tmp_date2.weekday()]
+    tmp_date3 = current_time - datetime.timedelta(days=3)
+    three_day_ago = tmp_date3.strftime("%Y.%m.%d")
+    # three_day_week = tmp_date3.strftime("%A")
+    three_day_week = '월화수목금토일'[tmp_date3.weekday()]
+
+    # logging.debug(f"day_ago : {one_day_ago} {two_day_ago} {three_day_ago}")
+    arg_date = request.args.get('date', formatted_date) # argument 날짜 받아오고 없으면 당일자로 
+    # logging.debug(f"arg_date : {arg_date}")
+
+    if arg_date == formatted_date:  # 당일일 경우
+        formatted_date = current_time.strftime("%Y%m%d")
+    elif arg_date == one_day_ago:   # 전일
+        formatted_date = one_day_ago.replace(".","")
+    elif arg_date == two_day_ago:   # 2일전
+        formatted_date = two_day_ago.replace(".","")
+    elif arg_date == three_day_ago: # 3일전
+        formatted_date = three_day_ago.replace(".","")
+
+    # logging.debug(f"formatted_date : {formatted_date}")
+    # logging.debug(f"today : {today}")
+
+    # Get the value of the checkbox (True if checked, False if not)
+    rm_dup = request.args.get('rm_dup', False)
+    ho = "ho"
+    userid = session['userid']
+    def query_f(ho):
+        result_sql = f'SELECT date, replace(bld_id,"BLD",""), memo, naver_bld_id, name, type, price, info_area_type, info_area_spec, ROUND(size_real*0.3025, 2), floor, agent_name, {ho} FROM land_item where date = "{formatted_date}" and agent_name = ( SELECT company FROM account WHERE userid = "{userid}" )'
+        return result_sql
+    query = query_f(ho)
+    # Add GROUP BY clause if checkbox is checked
+    if rm_dup == 'true':
+        ho = "MAX(ho) AS ho"
+        query = query_f(ho)
+        query += ' GROUP BY bld_id, price, size_real'
+    query += ';'
+    items = query_database(query)
+    
+    # return render_template('land_item5.html', items=items, userid=userid, today=formatted_date2, line=line[0][0])
+    return render_template('land_item7.html', items=items, userid=userid, today=today, today_week=today_week, one_day_ago=one_day_ago, one_day_week=one_day_week, two_day_ago=two_day_ago, two_day_week=two_day_week, three_day_ago=three_day_ago, three_day_week=three_day_week)
+
 def admin_check(userid):    # 관리자 여부 체크
     query = f'SELECT admin FROM account WHERE userid = "{userid}"'
     admin_col = query_database(query)
@@ -336,6 +397,20 @@ def display_account():      # 계정 리스트
         userid = session['userid']
         # return render_template('account1.html', items=items)
         return render_template('account3.html', items=items, userid=userid)
+    else:
+        return redirect(url_for('index'))
+
+@app.route('/adm/ranking')
+def display_ranking():      # 중개사무소별 랭킹
+    if admin_check(session['userid']):
+        # 날짜 (오늘)
+        current_time = datetime.datetime.now()
+        formatted_date = current_time.strftime("%Y%m%d")
+        query = f'SELECT count(*), agent_name FROM land_item WHERE date = "{formatted_date}" GROUP BY agent_name ORDER BY 1 desc;'
+        items = query_database(query)
+        userid = session['userid']
+        # return render_template('account1.html', items=items)
+        return render_template('ranking1.html', items=items, userid=userid)
     else:
         return redirect(url_for('index'))
 
