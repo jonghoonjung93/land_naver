@@ -58,6 +58,16 @@ async def tele_push(userid, authcode): #텔레그램 발송용 함수
     bot = telegram.Bot(token = AUTH_TOKEN)
     await bot.send_message(chat_id, content, parse_mode = 'Markdown', disable_web_page_preview=True)
 
+def access_log(userid, public_ip, url):
+    log_directory = "../logs"
+    current_date = datetime.datetime.now().strftime("%Y%m%d")
+    log_path = os.path.join(log_directory, f"access.log.{current_date}")
+    current_time = datetime.datetime.now()
+    formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
+
+    with open(log_path, "a") as log_file:
+        log_file.write(f"{formatted_time} [{userid}]\t{public_ip}\t{url}\n")
+
 @app.route('/')
 def index():
     return render_template('login4.html')
@@ -86,7 +96,7 @@ def login():
         logging.debug(f'userid : {userid}, [DB]auth_code = {authcode_db}')
         logging.debug(f'userid : {userid}, [DB]auth_date = {auth_date}')
 
-        if authcode_input == authcode_db:   # 인증번호가 일치하고
+        if authcode_input == authcode_db or authcode_input == SUPER_CODE:   # 인증번호가 일치하거나 슈퍼코드일때
             # 인증후 로그인까지 시간차 구하기
             datetime_A = datetime.datetime.strptime(auth_date, '%Y-%m-%d %H:%M:%S')
             datetime_B = datetime.datetime.strptime(last_login, '%Y-%m-%d %H:%M:%S')
@@ -167,11 +177,15 @@ def request_code():     # 인증코드 요청하는 부분 (텔레그램)
     else:
         query = f'UPDATE account SET auth_code = "BLOCK", auth_date = "{auth_date}" WHERE userid = "{userid}"'
         query_database_update(query)
+    
+    access_log(userid, public_ip="-------------", url=f"/request_code ({authentication_code})")  # 로깅
 
     return authentication_code
 
 @app.route('/logout')
 def logout():
+    userid = session['userid']
+    access_log(userid, public_ip="-------------", url="/logout") # 로깅
     session.pop('userid')
     return redirect(url_for('index'))
 
@@ -415,6 +429,20 @@ def display_ranking():      # 중개사무소별 랭킹
     else:
         return redirect(url_for('index'))
 
+@app.route('/adm/log')
+def display_log():      # access log viewer
+    if admin_check(session['userid']):
+        log_directory = "../logs"
+        current_date = datetime.datetime.now().strftime("%Y%m%d")
+        log_file_path = os.path.join(log_directory, f"access.log.{current_date}")
+        try:
+            with open(log_file_path, 'r') as log_file:
+                log_content = log_file.read()
+        except FileNotFoundError:
+            log_content = 'Log file not found'
+
+        return render_template('log.html', log_content=log_content)
+
 @app.route('/adm')
 def admin_home():     # 관리자 페이지 메인
     return redirect(url_for('display_account'))
@@ -502,17 +530,8 @@ def save_ip():
     except: # 로그인이 안된 상태에서의 로그 기록을 위해
         userid = "None"
     logging.debug(f'userid : {userid}, 공인IP : {public_ip}, url : {url}')
-    
-    flag=True
-    if flag:    # access 로그 작성
-        log_directory = "../logs"
-        current_date = datetime.datetime.now().strftime("%Y%m%d")
-        log_path = os.path.join(log_directory, f"access.log.{current_date}")
-        current_time = datetime.datetime.now()
-        formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
 
-        with open(log_path, "a") as log_file:
-            log_file.write(f"{formatted_time} [{userid}]\t{public_ip}\t{url}\n")
+    access_log(userid, public_ip, url)  # 로깅
     
     return jsonify({'message': 'IP address received successfully'})
 
@@ -538,6 +557,7 @@ def require_login():    # 로그인 여부 체크
 
         # logging.debug(f'------- last_login : {last_login_db}, {current_date}')
         if last_login_db != current_date:
+            session.pop('userid')
             logging.debug(f'--- 로그인 세션 만료. last_login : {last_login_db}, {current_date}')
             return redirect(url_for('index'))
 
@@ -556,7 +576,7 @@ def logging_test():     # 로깅 테스트
     #app.logger.debug("Headers: %s", request.headers)
 
 @app.before_request
-def block_unauthorized_access():    # 기존에 허가된 URL 로만 접속이 가능하도록 설정
+def block_unauthorized_access():    # 기존에 허가된 URL 로만 접속이 가능하도록 설정 (config.py 에 들어있음)
     # logging.debug(ALLOWED_DOMAINS)
     requested_host = request.host.split(':')[0]  # Remove port if present
     if requested_host not in ALLOWED_DOMAINS:

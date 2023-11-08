@@ -40,10 +40,6 @@
       .mt-5 {
         margin-top: 0.5rem !important;
       }
-      a {
-        text-decoration: none; /* 밑줄 제거 */
-        color: inherit; /* 링크 색상을 부모 엘리먼트에서 상속받음 */
-      }
     </style>
   </head>
   <body>
@@ -56,7 +52,7 @@
           <a href="/adm/log" class="btn btn-primary {% if request.path == '/adm/log' %}active{% endif %}">log</a>
         </div>
         <div class="d-flex justify-content-center">
-          <h5>관리자 모드 : ranking</h5>
+          <h5>관리자 모드 : access.log</h5>
         </div>
         <div class="d-flex justify-content-end">
           <h5 class="mr-3">{{ userid }}</h5>
@@ -65,57 +61,8 @@
       </div>
     </div>
     <div class="container-fluid mt-5">
-      <!-- <h1>리스트</h1> -->
-      <div class="table-responsive">
-        <table class="table table-striped table-bordered" id="landItemsTable">
-          <thead>
-            <tr>
-              <th style="white-space: nowrap">매물수</th>
-              <th style="white-space: nowrap">중개사사무소</th>
-              <th style="white-space: nowrap">변화</th>
-              <!-- <th style="white-space: nowrap">출처</th> -->
-              <th style="white-space: nowrap">대표</th>
-              <th style="white-space: nowrap">주소</th>
-              <th style="white-space: nowrap">전화번호</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for item in items %}
-            <tr>
-              <!-- agent_name, count, chg, link, owner, address, tel1 -->
-              <td style="font-size: 14px; text-align: center;" nowrap>
-                <strong>{{ item[1] }}</strong>
-              </td>
-              <td style="font-size: 14px" nowrap>{{ item[0] }}</td>
-              <!-- <td style="font-size: 14px; text-align: center;" nowrap>{{ item[2] }}</td> -->
-              <td style="font-size: 14px; text-align: center;" nowrap>
-                {% if item[2] == "new" %}
-                  <span style="color: blue;">new</span>
-                {% else %}
-                  {% set item2 = item[2]|int(default=0) %} <!-- item[2]를 정수로 변환, 기본값은 0 -->
-                  {% if item2 > 0 %}
-                    <span style="color: red;">▲ {{ item2 }}</span>
-                  {% elif item2 < 0 %}
-                    <span style="color: green;">▼ {{ item2|abs }}</span>
-                  {% elif item2 == 0 %}
-                    {{ item2 }}
-                  {% else %}
-                    {{ item2 }}
-                  {% endif %}
-                {% endif %}
-              </td>                 
-              <td style="font-size: 14px" nowrap>
-                <!-- <a href="{{ item[3] }}" target="_blank" class="btn btn-primary custom-link-button">{{ item[4] }}</a> -->
-                <a href="{{ item[3] }}" target="_blank" >{{ item[4] }}</a>
-              </td>
-              <!-- <td style="font-size: 14px" nowrap>{{ item[4] }}</td> -->
-              <td style="font-size: 14px" nowrap>{{ item[5] }}</td>
-              <td style="font-size: 14px" nowrap>{{ item[6] }}</td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
+      <h1>Access Log</h1>
+      <pre>{{ log_content }}</pre>
     </div>
     <!-- 저작권 정보 footer 추가 -->
     <!-- <footer class="text-center mt-4">
