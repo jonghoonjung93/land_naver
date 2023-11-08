@@ -429,8 +429,8 @@ def display_ranking():      # 중개사무소별 랭킹
     else:
         return redirect(url_for('index'))
 
-@app.route('/adm/log')
-def display_log():      # access log viewer
+@app.route('/adm/a.log')
+def display_a_log():      # access log viewer
     if admin_check(session['userid']):
         log_directory = "../logs"
         current_date = datetime.datetime.now().strftime("%Y%m%d")
@@ -440,8 +440,24 @@ def display_log():      # access log viewer
                 log_content = log_file.read()
         except FileNotFoundError:
             log_content = 'Log file not found'
+        
+        userid = session['userid']
+        return render_template('log.html', log_content=log_content, userid=userid)
 
-        return render_template('log.html', log_content=log_content)
+@app.route('/adm/b.log')
+def display_b_log():      # access log viewer
+    if admin_check(session['userid']):
+        log_directory = "../logs"
+        current_date = datetime.datetime.now().strftime("%Y%m%d")
+        log_file_path = os.path.join(log_directory, f"log.{current_date}")
+        try:
+            with open(log_file_path, 'r') as log_file:
+                log_content = log_file.read()
+        except FileNotFoundError:
+            log_content = 'Log file not found'
+
+        userid = session['userid']
+        return render_template('log.html', log_content=log_content, userid=userid)
 
 @app.route('/adm')
 def admin_home():     # 관리자 페이지 메인

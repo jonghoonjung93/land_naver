@@ -49,10 +49,11 @@
           <a href="/adm/account" class="btn btn-primary mr-1 {% if request.path == '/adm/account' %}active{% endif %}">account</a>
           <a href="/adm/message" class="btn btn-primary mr-1 {% if request.path == '/adm/message' %}active{% endif %}">message</a>
           <a href="/adm/ranking" class="btn btn-primary mr-1 {% if request.path == '/adm/ranking' %}active{% endif %}">ranking</a>
-          <a href="/adm/log" class="btn btn-primary {% if request.path == '/adm/log' %}active{% endif %}">log</a>
+          <a href="/adm/a.log" class="btn btn-primary mr-1 {% if request.path == '/adm/a.log' %}active{% endif %}">a.log</a>
+          <a href="/adm/b.log" class="btn btn-primary {% if request.path == '/adm/b.log' %}active{% endif %}">b.log</a>
         </div>
         <div class="d-flex justify-content-center">
-          <h5>관리자 모드 : access.log</h5>
+          <h5>관리자 모드 : Log Viewer</h5>
         </div>
         <div class="d-flex justify-content-end">
           <h5 class="mr-3">{{ userid }}</h5>
@@ -61,7 +62,7 @@
       </div>
     </div>
     <div class="container-fluid mt-5">
-      <h1>Access Log</h1>
+      <!-- <h1>Access Log</h1> -->
       <pre>{{ log_content }}</pre>
     </div>
     <!-- 저작권 정보 footer 추가 -->
