@@ -16,8 +16,6 @@ import time, datetime
 import sqlite3
 # import sys
 
-# ----------- MAIN ------------- 
-
 #--- Start Time 기록 -----
 flag = True
 if flag:
@@ -115,19 +113,26 @@ if flag:	# --------------------------- MAIN -----------------------------
 				address = agt_number[0].text
 				tel = agt_number[1].text
 			except:
-				printL("RETRY Failed. continue...")
-				owner = ""
-				address = ""
-				tel = ""
+				printL("RETRY Failed. 전일자에서라도 정보를 검색...")
+				query = f'SELECT owner, address, tel1 FROM agent WHERE agent_name = "{agent}" AND owner != ""'	# 현재 매물이 없어졌으니 어제자 정보라도 찾기
+				agent_info = query_database(query)
+				printL(f'agent_info length = {len(agent_info)}')
+				if len(agent_info) > 0:
+					owner = f'{agent_info[0][0]}⚲'
+					address = agent_info[0][1]
+					tel = agent_info[0][2]
+				else:
+					owner = ""
+					address = ""
+					tel = ""
 
-		query = f'SELECT count(*) FROM land_item WHERE date = "{yesterday}" AND agent_name = "{agent}"'
+		query = f'SELECT count(*) FROM land_item WHERE date = "{yesterday}" AND agent_name = "{agent}"'	# 어제 매물건수 확인
 		yesterday_count = query_database(query)[0][0]
 		if yesterday_count == 0:
 			chg = "new"
 		else:
 			chg = count - yesterday_count
-		printL(f'count = {count}')
-		printL(f'chg = {chg}')
+		printL(f'count = {count}, chg = {chg}')
 		printL(f'owner = {owner}')
 		printL(f'address = {address}')
 		printL(f'tel = {tel}')
