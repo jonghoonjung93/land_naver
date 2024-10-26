@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>로그인</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f5f5f5;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+
+      .container {
+        background-color: #fff;
+        padding: 40px;
+        border-radius: 10px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        width: 400px;
+      }
+
+      h2 {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      label {
+        font-weight: bold;
+      }
+
+      input[type="password"] {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 20px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+      }
+
+      input[type="userid"] {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 20px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+      }
+
+      input[type="hash"] {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 20px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+      }
+
+      button[type="submit"] {
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        padding: 10px 20px;
+        cursor: pointer;
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>로그인</h2>
+      <form id="loginForm">
+        <div>
+          <label for="inputUserid">USER ID:</label>
+          <input type="userid" id="inputUserid" name="inputUserid" required />
+        </div>
+        <div>
+          <label for="inputPassword">Password:</label>
+          <input type="password" id="inputPassword" name="inputPassword" required />
+        </div>
+        <button type="submit">로그인</button>
+      </form>
+      <div id="message" class="mt-3"></div>
+      <!-- Message area -->
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+      $(document).ready(function () {
+        $("#loginForm").submit(function (event) {
+          event.preventDefault();
+
+          var inputUserid = $("#inputUserid").val();
+          var inputPassword = $("#inputPassword").val();
+
+          $.ajax({
+            type: "POST",
+            url: "/login_work",
+            data: {
+              inputUserid: inputUserid,
+              inputPassword: inputPassword,
+            },
+            success: function (response) {
+              // Display a success message to the user
+              console.log(response.message);
+              console.log(response.result);
+              if (response.result) {
+                console.log("성공");
+                // 완료 메세지 화면출력
+                $("#message").html('<p class="text-success">로그인이 성공했습니다.</p>');
+                // Clear input fields on success
+                $("#hashPassword").val(response.message);
+              } else {
+                console.log("실패");
+                // 실패 메세지 화면출력
+                $("#message").html('<p class="text-danger">로그인이 실패했습니다. 입력값을 확인하세요.</p>');
+              }
+            },
+            error: function (error) {
+              // Display an error message to the user
+              console.error(response.error);
+              $("#message").html('<p class="text-danger">알 수 없는 에러가 발생했습니다.</p>');
+            },
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

@@ -551,9 +551,140 @@ def save_ip():
     
     return jsonify({'message': 'IP address received successfully'})
 
+#----------------------------------------------------------------------------------------------#
+# import hashlib
+
+# @app.route('/join', methods=['GET'])   #회원가입 화면 템플릿지정
+# def join():
+#     return render_template('join.html')
+
+# @app.route('/loginH', methods=['GET'])   #로그인 화면 템플릿지정
+# def loginH():
+#     return render_template('loginH.html')
+
+# def query_database(query):
+#     conn = sqlite3.connect(DATABASE)
+#     cursor = conn.cursor()
+#     cursor.execute(query)
+#     result = cursor.fetchall()
+#     cursor.close()
+#     conn.close()
+#     return result
+
+# def query_database_insert(query):
+#     conn = sqlite3.connect(DATABASE)
+#     cursor = conn.cursor()
+#     cursor.execute(query)
+#     conn.commit()
+#     cursor.close()
+#     conn.close()
+
+# @app.route('/join_work', methods=['POST'])  #회원가입 hash 암호화 및 DB 저장
+# def join_work():
+#     input_userid = request.form.get('inputUserid')
+#     input_password = request.form.get('inputPassword')
+#     confirm_password = request.form.get('confirmPassword')
+
+#     logging.debug(f"input_userid : {input_userid}")
+#     logging.debug(f"input_password : {input_password}")
+#     logging.debug(f"confirm_password : {confirm_password}")
+
+#     if input_password == confirm_password:    # 패스워드 두번 입력값이 동일한 경우
+#         logging.debug("password confirm validation pass")
+#         validation_passed = True
+#     else:
+#         validation_passed = False
+
+#     if validation_passed:   # password 입력값이 같으면 회원가입 처리, DB저장
+#         # 입력된 암호 hash 암호화처리
+#         hash_object = hashlib.sha256()
+#         hash_object.update(input_password.encode())
+#         hash_string = hash_object.hexdigest()
+
+#         query = f'INSERT INTO account_hash VALUES ("{input_userid}", "{hash_string}")'
+#         query_database_insert(query)
+
+#         message_text = 'success'
+#             # Return a success response
+#         response_data = {
+#             'message': message_text,
+#             'result': True
+#         }
+#         return jsonify(response_data)   
+#     else:
+#         message_text = 'fail'
+#         # Return an error response
+#         response_data = {
+#            'message': message_text,
+#            'result': False
+#         }
+#         return jsonify(response_data)
+
+# @app.route('/login_work', methods=['POST'])  #로그인 처리
+# def login_work():
+#     input_userid = request.form.get('inputUserid')
+#     input_password = request.form.get('inputPassword')
+
+#     logging.debug(f"input_userid : {input_userid}")
+#     logging.debug(f"input_password : {input_password}")
+
+#     #입력된 암호 hash 암호화
+#     hash_object = hashlib.sha256()
+#     hash_object.update(input_password.encode())
+#     hash_string = hash_object.hexdigest()
+#     logging.debug(f"hash_string : {hash_string}")
+
+#     #DB에서 해당 userid 의 hash 데이터 가져오기
+#     query = f'SELECT count(*) FROM account_hash WHERE userid = "{input_userid}" AND password_hash = "{hash_string}"'
+#     result = query_database(query)
+#     logging.debug(result[0][0])
+
+#     if result[0][0] == 1:   # 입력값과 DB 내부에 hash 암호화된 내용이 일치할 경우
+#         logging.debug("userid/passwd_hash validation pass")
+#         message_text = 'success'
+#             # Return a success response
+#         response_data = {
+#             'message': message_text,
+#             'result': True
+#         }
+#         return jsonify(response_data)
+#     else:
+#         message_text = 'fail'
+#         # Return an error response
+#         response_data = {
+#            'message': message_text,
+#            'result': False
+#         }
+#         return jsonify(response_data)
+
+@app.route('/hash', methods=['GET'])   #hash 암호화
+def hash():
+    return render_template('hash.html')
+
+@app.route('/hash_password', methods=['POST'])
+def hash_password():
+    import hashlib
+    input_password = request.form.get('inputPassword')
+
+    hash_object = hashlib.sha256()
+    hash_object.update(input_password.encode())
+    hash_string = hash_object.hexdigest()
+
+    logging.debug(f"hash_string : {hash_string}")
+
+    # Return a success response
+    response_data = {
+        'message': hash_string,
+        'result': True
+    }
+    # return jsonify(message='Password updated successfully')
+    return jsonify(response_data)
+#----------------------------------------------------------------------------------------------#
+
 @app.before_request
 def require_login():    # 로그인 여부 체크
-    allowed_routes = ['index', 'login', 'logout', 'static', 'request_code', 'save_ip']  # 이것들은 로그인이 안되어있어도 정상 작동됨
+    # allowed_routes = ['index', 'login', 'logout', 'static', 'request_code', 'save_ip']  # 이것들은 로그인이 안되어있어도 정상 작동됨
+    allowed_routes = ['index', 'login', 'logout', 'static', 'request_code', 'save_ip', 'join', 'join_work', 'loginH', 'hash', 'hash_password', 'login_work']  # 이것들은 로그인이 안되어있어도 정상 작동됨
     # print(request.endpoint)
     # print(session.get('userid'))
     if request.endpoint not in allowed_routes and 'userid' not in session:
