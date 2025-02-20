@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Balance Data</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+      th,
+      td {
+        border: 1px solid black;
+        padding: 8px;
+        text-align: center;
+      }
+      th {
+        background-color: #f2f2f2;
+      }
+      #chart-container {
+        width: 100%;
+        max-width: 800px;
+        height: 300px; /* 고정된 높이 설정 */
+        margin: auto;
+      }
+      canvas {
+        width: 100% !important;
+        height: 100% !important;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- <h2>Balance Data</h2> -->
+    <!-- <h2>Balance Data : {% if not bal_data.empty %}{{ bal_data.iloc[-1].total_krw }}{% else %}N/A{% endif %}</h2> -->
+    <h2>Balance : {% if not bal_data.empty %}{{ '{:,}'.format(bal_data.iloc[-1].total_krw) }}{% else %}N/A{% endif %}</h2>
+    <div id="chart-container">
+      <canvas id="balanceChart"></canvas>
+    </div>
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+          var ctx = document.getElementById('balanceChart').getContext('2d');
+          var balanceChart = new Chart(ctx, {
+              type: 'line',
+              data: {
+                  labels: [{% for row in bal_data.itertuples() %} "{{ row.date }}", {% endfor %}],
+                  datasets: [{
+                      label: 'Total (단위 : 만원)',
+                      data: [{% for row in bal_data.itertuples() %} {{ row.total_krw }}, {% endfor %}],
+                      borderColor: 'blue',
+                      backgroundColor: 'rgba(0, 0, 255, 0.1)',
+                      borderWidth: 2,
+                      fill: true
+                  }]
+              },
+              options: {
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  animation: false, /* 애니메이션 비활성화 */
+                  scales: {
+                      x: {
+                          title: {
+                              display: true,
+                              text: 'Date'
+                          }
+                      },
+                      y: {
+                          title: {
+                              display: true,
+                              text: 'Total (단위 : 만원)'
+                          }
+                      }
+                  }
+              }
+          });
+      });
+    </script>
+  </body>
+</html>

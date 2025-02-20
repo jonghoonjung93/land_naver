@@ -551,7 +551,43 @@ def save_ip():
     
     return jsonify({'message': 'IP address received successfully'})
 
-#----------------------------------------------------------------------------------------------#
+#----- dashboard 추가 ------#
+import pandas as pd
+bal_data = []
+@app.route('/bal')
+def bal_data():
+    global bal_data
+    conn = sqlite3.connect("../../attendance/stock.sqlite3")
+    cursor = conn.cursor()
+    
+    try:
+        # SQL 쿼리 실행
+        query = "SELECT date, user, stock_cnt, total_krw FROM stock_history WHERE user = 'TOTAL';"
+        cursor.execute(query)
+
+        # 결과 가져오기
+        data = cursor.fetchall()
+
+        # 데이터프레임 생성
+        bal_data = pd.DataFrame(data, columns=["date", "user", "stock_cnt", "total_krw"])
+
+        # total_krw 값을 10000으로 나누기
+        bal_data["total_krw"] = (bal_data["total_krw"] / 10000).astype(int)
+
+        # print(bal_data)
+
+        if not bal_data.empty:
+            pass
+        else:
+            print("⚠️ No data!")
+    except Exception as e:
+        print(f"❌ Error in fetch_stock_data: {e}")
+    
+    return render_template('balance.html', bal_data=bal_data)
+#-------- dashboard 끝 -----------#
+
+
+#-------------------- hash 관련 추가부분 --------------------------------------------------------------------------#
 # import hashlib
 
 # @app.route('/join', methods=['GET'])   #회원가입 화면 템플릿지정
@@ -684,7 +720,7 @@ def hash_password():
 @app.before_request
 def require_login():    # 로그인 여부 체크
     # allowed_routes = ['index', 'login', 'logout', 'static', 'request_code', 'save_ip']  # 이것들은 로그인이 안되어있어도 정상 작동됨
-    allowed_routes = ['index', 'login', 'logout', 'static', 'request_code', 'save_ip', 'join', 'join_work', 'loginH', 'hash', 'hash_password', 'login_work']  # 이것들은 로그인이 안되어있어도 정상 작동됨
+    allowed_routes = ['index', 'login', 'logout', 'static', 'request_code', 'save_ip', 'join', 'join_work', 'loginH', 'hash', 'hash_password', 'login_work', 'bal_data']  # 이것들은 로그인이 안되어있어도 정상 작동됨
     # print(request.endpoint)
     # print(session.get('userid'))
     if request.endpoint not in allowed_routes and 'userid' not in session:
