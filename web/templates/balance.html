@@ -47,7 +47,7 @@
               data: {
                   labels: [{% for row in bal_data.itertuples() %} "{{ row.date }}", {% endfor %}],
                   datasets: [{
-                      label: 'Total (단위 : 만원)',
+                      label: 'Total',
                       data: [{% for row in bal_data.itertuples() %} {{ row.total_krw }}, {% endfor %}],
                       borderColor: 'blue',
                       backgroundColor: 'rgba(0, 0, 255, 0.1)',
@@ -58,7 +58,7 @@
               options: {
                   responsive: true,
                   maintainAspectRatio: false,
-                  animation: false, /* 애니메이션 비활성화 */
+                  animation: true, /* 애니메이션 비활성화 */
                   scales: {
                       x: {
                           title: {
@@ -66,10 +66,20 @@
                               text: 'Date'
                           }
                       },
+                      // y: {
+                      //     title: {
+                      //         display: true,
+                      //         // text: 'Total (단위 : 만원)'
+                      //     }
+                      // }
                       y: {
+                          ticks: {
+                              callback: function(value, index, values) {
+                                  return String(value).substring(0, 2); // 앞 2자리만 표시
+                              }
+                          },
                           title: {
-                              display: true,
-                              text: 'Total (단위 : 만원)'
+                              display: true
                           }
                       }
                   }
