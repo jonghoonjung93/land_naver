@@ -77,7 +77,7 @@ def parse_stock_info(result):
 				"time": time
 			}
 		else:
-			printL(f"데이터 파싱 실패: {result}")
+			printL(f"데이터 파싱함수 실패: {result}")
 			return None
 	except Exception as e:
 		printL(f"데이터 파싱 에러: {str(e)}")
@@ -104,13 +104,28 @@ def stock_check():
 		result1 = driver.find_element(By.CLASS_NAME, "csr134").text
 		
 		# 데이터 파싱
-		stock_info = parse_stock_info(result1)
-		if stock_info:
-			printL(f"TSLA 주가 정보: {stock_info}")
-			return stock_info
-		else:
-			printL("데이터 파싱 실패")
+		if "Opening" in result1:
+			# printL(f"Open {result1}")
+			result2 = driver.find_element(By.CLASS_NAME, "csr113").text
+			# printL(f"result2: {result2}")
+			result2 = result2.replace("\n", " ")
+			# printL(f"result2: {result2}")
+			# printL(f"result2 repr: {repr(result2)}")
+			result3 = result1.replace("Opening", f"Opening: {result2}")
+			# printL(f"result3: {result3}")
+			stock_info = parse_stock_info(result3)
+			if stock_info:
+				printL(f"TSLA 주가 정보: {stock_info}")
+				return stock_info
 			return None
+		else:
+			stock_info = parse_stock_info(result1)
+			if stock_info:
+				printL(f"TSLA 주가 정보: {stock_info}")
+				return stock_info
+			else:
+				printL("데이터 파싱 실패")
+				return None
 		
 	except Exception as e:
 		printL(f"에러 발생: {str(e)}")
