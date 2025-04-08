@@ -3,7 +3,7 @@ let widget = new ListWidget();
 widget.backgroundColor = new Color("#1a1a1a");
 
 // API 엔드포인트 설정
-const API_URL = "http://192.168.0.49:9000/tsla";
+const API_URL = "http://land.iptime.org/tsla";
 
 async function getStockPrice() {
   try {
@@ -35,7 +35,7 @@ if (stockData && !stockData.error) {
 
   // 심볼과 마켓 표시
   let symbolText = widget.addText(`${stockData.symbol} (${stockData.market})`);
-  symbolText.font = Font.boldSystemFont(12);
+  symbolText.font = Font.boldSystemFont(14);
   symbolText.textColor = Color.white();
   widget.addSpacer(4);
 
