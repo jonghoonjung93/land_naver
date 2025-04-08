@@ -104,21 +104,16 @@ def stock_check():
 		result1 = driver.find_element(By.CLASS_NAME, "csr134").text
 		
 		# 데이터 파싱
-		if "Opening" in result1:
-			# printL(f"Open {result1}")
+		if "Open" in result1:	# 장이 Open 했을때 (Opening 이라는 문자열이 들어있음)
 			result2 = driver.find_element(By.CLASS_NAME, "csr113").text
-			# printL(f"result2: {result2}")
 			result2 = result2.replace("\n", " ")
-			# printL(f"result2: {result2}")
-			# printL(f"result2 repr: {repr(result2)}")
-			result3 = result1.replace("Opening", f"Opening: {result2}")
-			# printL(f"result3: {result3}")
+			result3 = result1.replace("Opening", f"Open: {result2}")
 			stock_info = parse_stock_info(result3)
 			if stock_info:
 				printL(f"TSLA 주가 정보: {stock_info}")
 				return stock_info
 			return None
-		else:
+		else:	# Pre-market(검증O), After-hours(검증X), Over-night(검증X) 일때
 			stock_info = parse_stock_info(result1)
 			if stock_info:
 				printL(f"TSLA 주가 정보: {stock_info}")
