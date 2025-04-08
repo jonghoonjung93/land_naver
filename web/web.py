@@ -1,5 +1,5 @@
 import sqlite3
-from flask import Flask, render_template, request, redirect, url_for, session, flash, Response, jsonify
+from flask import Flask, render_template, request, redirect, url_for, session, flash, Response, jsonify, make_response
 import logging
 import datetime, time
 # from datetime import datetime
@@ -551,7 +551,7 @@ def save_ip():
     
     return jsonify({'message': 'IP address received successfully'})
 
-#----- dashboard 추가 ------#
+#----- dashboard (일일 balance 데이터 뷰어) 추가 ------#
 import pandas as pd
 bal_data = []
 @app.route('/bal')
@@ -584,7 +584,7 @@ def bal_data():
         print(f"❌ Error in fetch_stock_data: {e}")
     
     return render_template('balance.html', bal_data=bal_data)
-#-------- dashboard 끝 -----------#
+#-------- dashboard 끝 ---------------------------#
 
 
 #-------------------- hash 관련 추가부분 --------------------------------------------------------------------------#
@@ -717,10 +717,41 @@ def hash_password():
     return jsonify(response_data)
 #----------------------------------------------------------------------------------------------#
 
+#-------- 주가 위젯 추가 부분 시작 ---------------------#
+# from flask import Flask, jsonify, make_response
+# from flask_cors import CORS
+from webull import stock_check
+
+# CORS(app)
+@app.route('/tsla')
+def get_tsla():
+    try:
+        stock_info = stock_check()
+        if stock_info:
+            response = make_response(jsonify({
+                "symbol": "TSLA",
+                "market": stock_info["market"],
+                "price": stock_info["price"],
+                "mod": stock_info["mod"],
+                "pct": stock_info["pct"],
+                "time": stock_info["time"]
+            }))
+            # 캐시 방지 헤더 추가
+            response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+            response.headers["Pragma"] = "no-cache"
+            response.headers["Expires"] = "0"
+            return response
+        else:
+            return jsonify({"error": "주가 정보를 가져올 수 없습니다"})
+    except Exception as e:
+        return jsonify({"error": str(e)})
+
+#-------- 주가 위젯 추가 부분 끝 ---------------------#
+
 @app.before_request
 def require_login():    # 로그인 여부 체크
     # allowed_routes = ['index', 'login', 'logout', 'static', 'request_code', 'save_ip']  # 이것들은 로그인이 안되어있어도 정상 작동됨
-    allowed_routes = ['index', 'login', 'logout', 'static', 'request_code', 'save_ip', 'join', 'join_work', 'loginH', 'hash', 'hash_password', 'login_work', 'bal_data']  # 이것들은 로그인이 안되어있어도 정상 작동됨
+    allowed_routes = ['index', 'login', 'logout', 'static', 'request_code', 'save_ip', 'join', 'join_work', 'loginH', 'hash', 'hash_password', 'login_work', 'bal_data', 'get_tsla']  # 이것들은 로그인이 안되어있어도 정상 작동됨
     # print(request.endpoint)
     # print(session.get('userid'))
     if request.endpoint not in allowed_routes and 'userid' not in session:
