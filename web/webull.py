@@ -113,7 +113,8 @@ def stock_check():
 				printL(f"TSLA 주가 정보: {stock_info}")
 				return stock_info
 			return None
-		else:	# Pre-market(검증O), After-hours(검증X), Over-night(검증X) 일때
+		else:	# Pre Market(검증O), After Hours(검증X), Over-night(검증X) 일때
+			result1 = result1.replace(" Hours", "")
 			stock_info = parse_stock_info(result1)
 			if stock_info:
 				printL(f"TSLA 주가 정보: {stock_info}")
