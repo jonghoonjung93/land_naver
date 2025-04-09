@@ -95,14 +95,73 @@ def stock_check():
 	
 	try:
 		driver = webdriver.Chrome(options=options)
-		url1 = "https://www.webull.com/quote/nasdaq-tsla"
+
+		# EDT 20시(KST 09시)부터는 Overnight 이라 별도 처리 필요함
+		# KST 09:00 ~ 17:00 체크
+		kst_tz = pytz.timezone('Asia/Seoul')
+		kst_now = datetime.now(kst_tz)
+		kst_start = kst_now.replace(hour=9, minute=0, second=0, microsecond=0)
+		kst_end = kst_now.replace(hour=17, minute=0, second=0, microsecond=0)
 		
-		# webull TSLA 주가 조회
-		driver.get(url1)
-		action = ActionChains(driver)
-		time.sleep(3)
-		result1 = driver.find_element(By.CLASS_NAME, "csr134").text
-		
+		if kst_start <= kst_now <= kst_end:
+			url1 = "https://app.webull.com/stocks"
+			driver.get(url1)
+			action = ActionChains(driver)
+			time.sleep(3)
+
+			# TSLA 검색
+			# Symbol/Name 플레이스홀더가 있는 입력창 찾기
+			search_box = driver.find_element(By.XPATH, "//input[@placeholder='Symbol/Name']")
+			search_box.send_keys("TSLA")
+			time.sleep(2)
+			# Tesla 검색결과 클릭
+			tesla_result = driver.find_element(By.XPATH, "//span[text()='Tesla Inc']")
+			tesla_result.click()
+			time.sleep(3)
+			
+			# 주가 정보 가져오기
+	
+			# # DomWrap 내의 p 태그 찾기
+			# dom_wrap = driver.find_element(By.ID, "DomWrap")
+			# # dom_wrap 내용 출력
+			# # printL(f"dom_wrap 내용: {dom_wrap.get_attribute('innerHTML')}")
+			# # time.sleep(1000)
+			# p_elements = dom_wrap.find_elements(By.TAG_NAME, "p")
+			# result1 = ""
+			# for p in p_elements:
+			# 	result1 += p.text + " "
+			# result1 = result1.replace("\n", " ")
+			# # printL(f"result1: {result1}")
+
+			# BeautifulSoup으로 파싱 (docker Linux 에서 파싱이 안되는 부분을 해결하기 위함)
+			html = driver.find_element("id", "DomWrap").get_attribute("outerHTML")
+			soup = BeautifulSoup(html, "html.parser")
+			# 모든 <p> 태그 내용 가져오기
+			p_tags = soup.find_all("p")
+			result1 = "Overnight: "
+			# print(p_tags)
+			# p 태그 내의 span 태그들을 찾기
+			for p_tag in p_tags:
+				span_tags = p_tag.find_all("span")
+				for span in span_tags:
+					# print(span.text)
+					result1 = result1 + span.text + " "
+			# print(result1)
+			
+			# 현재 날짜/시간 출력
+			kst_now = datetime.now(kst_tz)
+			formatted_time = kst_now.strftime("%m/%d %H:%M KST")
+			result1 = result1 + " " + formatted_time
+			# print(result1)
+		else:
+			url1 = "https://www.webull.com/quote/nasdaq-tsla"
+
+			# webull TSLA 주가 조회
+			driver.get(url1)
+			action = ActionChains(driver)
+			time.sleep(3)
+			result1 = driver.find_element(By.CLASS_NAME, "csr134").text
+			
 		# 데이터 파싱
 		if "Open" in result1:	# 장이 Open 했을때 (Opening 이라는 문자열이 들어있음)
 			result2 = driver.find_element(By.CLASS_NAME, "csr113").text
@@ -113,9 +172,10 @@ def stock_check():
 				printL(f"TSLA 주가 정보: {stock_info}")
 				return stock_info
 			return None
-		else:	# Pre Market(검증O), After Hours(검증X), Over-night(검증X) 일때
+		else:	# Pre Market(검증O), After Hours(검증O), Overnight(검증O) 일때
 			result1 = result1.replace(" Hours", "")
 			result1 = result1.replace(" Market", "")
+			result1 = result1.replace("Overnight", "Over")
 			stock_info = parse_stock_info(result1)
 			if stock_info:
 				printL(f"TSLA 주가 정보: {stock_info}")
