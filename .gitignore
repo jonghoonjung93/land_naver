@@ -22,4 +22,4 @@ xlsx
 *_202*
 *.202*
 src
-web/*_widget.js
+web/*_widget*.js
