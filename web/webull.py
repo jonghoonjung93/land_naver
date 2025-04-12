@@ -103,7 +103,8 @@ def stock_check():
 		kst_start = kst_now.replace(hour=9, minute=0, second=0, microsecond=0)
 		kst_end = kst_now.replace(hour=17, minute=0, second=0, microsecond=0)
 		
-		if kst_start <= kst_now <= kst_end:
+		# 평일 오전 09:00 ~ 17:00 체크 (Overnight 장일때)
+		if kst_start <= kst_now <= kst_end and kst_now.weekday() <= 4:
 			url1 = "https://app.webull.com/stocks"
 			driver.get(url1)
 			action = ActionChains(driver)
