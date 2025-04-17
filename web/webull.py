@@ -119,20 +119,6 @@ def stock_check():
 			tesla_result = driver.find_element(By.XPATH, "//span[text()='Tesla Inc']")
 			tesla_result.click()
 			time.sleep(3)
-			
-			# 주가 정보 가져오기
-	
-			# # DomWrap 내의 p 태그 찾기
-			# dom_wrap = driver.find_element(By.ID, "DomWrap")
-			# # dom_wrap 내용 출력
-			# # printL(f"dom_wrap 내용: {dom_wrap.get_attribute('innerHTML')}")
-			# # time.sleep(1000)
-			# p_elements = dom_wrap.find_elements(By.TAG_NAME, "p")
-			# result1 = ""
-			# for p in p_elements:
-			# 	result1 += p.text + " "
-			# result1 = result1.replace("\n", " ")
-			# # printL(f"result1: {result1}")
 
 			# BeautifulSoup으로 파싱 (docker Linux 에서 파싱이 안되는 부분을 해결하기 위함)
 			html = driver.find_element("id", "DomWrap").get_attribute("outerHTML")
