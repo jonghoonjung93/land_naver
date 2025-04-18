@@ -126,18 +126,29 @@ def stock_check():
 			# 모든 <p> 태그 내용 가져오기
 			p_tags = soup.find_all("p")
 			result1 = "Overnight: "
-			# print(p_tags)
-			# p 태그 내의 span 태그들을 찾기
-			for p_tag in p_tags:
-				span_tags = p_tag.find_all("span")
+			# printL(p_tags)
+			if not p_tags:	# p_tags 가 null 이면 (즉, 휴일이라 Overnight 주가가 없을때)
+				# printL("p_tags is null")
+				small_v = soup.select_one('#DomWrap > div:nth-child(2) > div:nth-child(3)')# After 어쩌구 부분의 주가를 가져옴(xpath)
+				text_parts = []
+				for div in small_v.find_all('div'):
+					div_text = div.text.strip()
+					if div_text:  # 빈 텍스트가 아닌 경우만 추가
+						text_parts.append(div_text)
+				# printL(text_parts)
+				result1 = f"{text_parts[0]}_H {text_parts[2]} {text_parts[3]} {text_parts[4]}"	# _H는 Holiday를 의미함
+			else:	# p_tags 에 뭐가 있을때 (즉, 일반적인 평일 낮)
+				# p 태그 내의 span 태그들을 찾기
+				for p_tag in p_tags:
+					span_tags = p_tag.find_all("span")
 				for span in span_tags:
-					# print(span.text)
+					# printL(span.text)
 					result1 = result1 + span.text + " "
-			# print(result1)
+			# print("result1: " + result1)
 			
 			# 현재 날짜/시간 출력
 			kst_now = datetime.now(kst_tz)
-			formatted_time = kst_now.strftime("%m/%d %H:%M KST")
+			formatted_time = kst_now.strftime("%H:%M %m/%d KST")
 			result1 = result1 + " " + formatted_time
 			# print(result1)
 		else:
@@ -148,6 +159,7 @@ def stock_check():
 			action = ActionChains(driver)
 			time.sleep(3)
 			result1 = driver.find_element(By.CLASS_NAME, "csr134").text
+			# printL(result1)
 			
 		# 데이터 파싱
 		if "Open" in result1:	# 장이 Open 했을때 (Opening 이라는 문자열이 들어있음)
