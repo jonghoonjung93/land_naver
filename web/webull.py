@@ -158,7 +158,8 @@ def stock_check():
 			driver.get(url1)
 			action = ActionChains(driver)
 			time.sleep(3)
-			result1 = driver.find_element(By.CLASS_NAME, "csr134").text
+			# result1 = driver.find_element(By.CLASS_NAME, "csr134").text	# csr134 -> csr133 이런식으로 class 이름이 자꾸 바뀜
+			result1 = driver.find_element(By.XPATH, '//*[@id="app"]/section/div[1]/div/div[2]/div[1]/div[2]/div[2]/div[2]/div').text
 			# printL(result1)
 			
 		# 데이터 파싱
