@@ -164,7 +164,8 @@ def stock_check():
 			
 		# 데이터 파싱
 		if "Open" in result1:	# 장이 Open 했을때 (Opening 이라는 문자열이 들어있음)
-			result2 = driver.find_element(By.CLASS_NAME, "csr113").text
+			# result2 = driver.find_element(By.CLASS_NAME, "csr113").text
+			result2 = driver.find_element(By.XPATH, '//*[@id="app"]/section/div[1]/div/div[2]/div[1]/div[2]/div[2]/div[1]').text
 			result2 = result2.replace("\n", " ")
 			result3 = result1.replace("Opening", f"Open: {result2}")
 			stock_info = parse_stock_info(result3)
