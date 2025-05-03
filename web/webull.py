@@ -15,10 +15,11 @@ import re
 
 def mode_check():
 	hostname = socket.gethostname()
-	if hostname == 'jungui-MacBookAir.local':
+	# print("hostname = " + hostname)
+	if 'local' in hostname.lower(): # jungui-MacBookAir.local, Mac-mini.local
 		MODE = "TEST"
 	else:
-		MODE = "ONLINE"
+		MODE = "ONLINE" # ubuntu-online
 	return(MODE)
 
 def printL(message):	# 로그파일 기록 함수 (맥북에서는 화면에도 출력)
@@ -28,7 +29,7 @@ def printL(message):	# 로그파일 기록 함수 (맥북에서는 화면에도 
 	current_time = datetime.now()
 	formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
 
-	if mode_check() == 'TEST':
+	if mode_check() == "TEST":
 		print(message)
 	with open(log_path, "a") as log_file:
 		log_file.write(f"{formatted_time} {message}\n")
@@ -87,7 +88,9 @@ def stock_check():
 	printL("-- stock check start")
 	options = Options()
 
-	options.add_argument("headless") #크롬창이 뜨지 않고 백그라운드로 동작됨
+	result = mode_check()
+	if result == "ONLINE":
+		options.add_argument("headless") # ONLINE 에서만 크롬창이 뜨지 않고 백그라운드로 동작됨
 				
 	# 아래 옵션 두줄 추가(NAS docker 에서 실행시 필요, memory 부족해서)
 	options.add_argument('--no-sandbox')
