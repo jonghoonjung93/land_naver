@@ -30,12 +30,19 @@
         width: 100% !important;
         height: 100% !important;
       }
+      .high-low {
+        font-weight: normal;
+        font-size: 0.9em;
+        margin-top: -15px;
+        margin-bottom: 10px;
+      }
     </style>
   </head>
   <body>
     <!-- <h2>Balance Data</h2> -->
     <!-- <h2>Balance Data : {% if not bal_data.empty %}{{ bal_data.iloc[-1].total_krw }}{% else %}N/A{% endif %}</h2> -->
     <h2>Balance : {% if not bal_data.empty %}{{ '{:,}'.format(bal_data.iloc[-1].total_krw) }}{% else %}N/A{% endif %}</h2>
+    <div class="high-low">(High: {% if not bal_data.empty %}{{ '{:,}'.format(bal_data.total_krw.max()) }}{% else %}N/A{% endif %}, Low: {% if not bal_data.empty %}{{ '{:,}'.format(bal_data.total_krw.min()) }}{% else %}N/A{% endif %})</div>
     <div id="chart-container">
       <canvas id="balanceChart"></canvas>
     </div>
