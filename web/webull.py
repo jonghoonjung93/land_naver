@@ -84,6 +84,19 @@ def parse_stock_info(result):
 		printL(f"데이터 파싱 에러: {str(e)}")
 		return None
 
+def summertime_check():
+	from zoneinfo import ZoneInfo
+	from datetime import datetime, timedelta	
+	# 미국 동부 타임존 (뉴욕 기준) 설정
+	tz = ZoneInfo("America/New_York")
+
+	# 현재 시간을 해당 타임존으로 변환
+	now = datetime.now(tz)
+
+	# DST가 적용 중인지 확인 (dst()가 timedelta(0)보다 크면 True)
+	is_dst = now.dst() != timedelta(0)
+	return is_dst
+
 def stock_check():
 	printL("-- stock check start")
 	options = Options()
@@ -96,6 +109,10 @@ def stock_check():
 	options.add_argument('--no-sandbox')
 	options.add_argument('--disable-dev-shm-usage')
 	
+	# 섬머타임 적용 상태(기간)인지 체크 (True = 섬머타임O, False = 섬머타임X)
+	summertime = summertime_check()
+	printL(f"summertime = {summertime}")
+
 	try:
 		driver = webdriver.Chrome(options=options)
 
@@ -103,8 +120,12 @@ def stock_check():
 		# KST 09:00 ~ 17:00 체크
 		kst_tz = pytz.timezone('Asia/Seoul')
 		kst_now = datetime.now(kst_tz)
-		kst_start = kst_now.replace(hour=9, minute=0, second=0, microsecond=0)
-		kst_end = kst_now.replace(hour=17, minute=0, second=0, microsecond=0)
+		if summertime:	# 섬머타임O, 대략 봄부터 11월초까지 밤10:30 본장 개장
+			kst_start = kst_now.replace(hour=9, minute=0, second=0, microsecond=0)
+			kst_end = kst_now.replace(hour=17, minute=0, second=0, microsecond=0)
+		else:	# 섬머타임X, 대략 11월부터 봄까지, 밤 11:30에 본장 개장
+			kst_start = kst_now.replace(hour=10, minute=0, second=0, microsecond=0)
+			kst_end = kst_now.replace(hour=18, minute=0, second=0, microsecond=0)
 		
 		# 평일 오전 09:00 ~ 17:00 체크 (Overnight 장일때)
 		if kst_start <= kst_now <= kst_end and kst_now.weekday() <= 4:
