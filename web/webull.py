@@ -34,7 +34,7 @@ def printL(message):	# 로그파일 기록 함수 (맥북에서는 화면에도 
 	with open(log_path, "a") as log_file:
 		log_file.write(f"{formatted_time} {message}\n")
 		
-def convert_to_kst(edt_time_str):
+def convert_edt_to_kst(edt_time_str):
 	try:
 		# EDT 시간 파싱
 		edt_time = datetime.strptime(edt_time_str, "%H:%M %m/%d EDT")
@@ -53,6 +53,27 @@ def convert_to_kst(edt_time_str):
 		printL(f"시간 변환 에러: {str(e)}")
 		return edt_time_str
 
+def convert_est_to_kst(est_time_str):
+	try:
+		# Parse EST time string
+		est_time = datetime.strptime(est_time_str, "%H:%M %m/%d EST")
+		# Set year to current year
+		est_time = est_time.replace(year=datetime.now().year)
+
+		# Set EST timezone
+		est_tz = pytz.timezone('US/Eastern')
+		est_time = est_tz.localize(est_time)
+
+		# Convert to KST
+		kst_tz = pytz.timezone('Asia/Seoul')
+		kst_time = est_time.astimezone(kst_tz)
+
+		return kst_time.strftime("%H:%M %m/%d KST")
+	except Exception as e:
+		printL(f"EST to KST conversion error: {str(e)}")
+		return est_time_str
+
+
 def parse_stock_info(result):
 	try:
 		# 정규표현식으로 데이터 분리
@@ -66,9 +87,10 @@ def parse_stock_info(result):
 			pct = match.group(4).strip()
 			time = match.group(5).strip()
 			
-			# 시간대 변환
 			if "EDT" in time:
-				time = convert_to_kst(time)
+				time = convert_edt_to_kst(time)
+			elif "EST" in time:
+				time = convert_est_to_kst(time)
 			
 			return {
 				"market": market,
@@ -111,6 +133,7 @@ def stock_check():
 	
 	# 섬머타임 적용 상태(기간)인지 체크 (True = 섬머타임O, False = 섬머타임X)
 	summertime = summertime_check()
+	# summertime = False
 	printL(f"summertime = {summertime}")
 
 	try:
@@ -174,7 +197,7 @@ def stock_check():
 			kst_now = datetime.now(kst_tz)
 			formatted_time = kst_now.strftime("%H:%M %m/%d KST")
 			result1 = result1 + " " + formatted_time
-			# print(result1)
+			# printL(result1)
 		else:
 			url1 = "https://www.webull.com/quote/nasdaq-tsla"
 
