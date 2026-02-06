@@ -213,10 +213,18 @@
             font-size: 15px;
         }
         .profit-positive {
-            color: #26a69a;
+            color: #00e676;
         }
         .profit-negative {
             color: #ef5350;
+        }
+        .price-positive {
+            color: #00e676;
+            font-weight: bold;
+        }
+        .price-negative {
+            color: #ef5350;
+            font-weight: bold;
         }
         .update-time {
             font-size: 10px;
@@ -320,6 +328,10 @@
         <div class="profit-content">
             <!-- 왼쪽: 시장 정보 -->
             <div class="market-info">
+                <div class="market-row" style="margin-bottom: 12px; padding-bottom: 12px; border-bottom: 2px solid #444;">
+                    <span class="market-label" style="font-size: 13px;">현재가:</span>
+                    <span class="market-value" id="currentPriceMarket" style="font-size: 20px;">로딩중...</span>
+                </div>
                 <div class="market-row">
                     <span class="market-label">시장:</span>
                     <span class="market-value" id="marketInfo">-</span>
@@ -341,10 +353,6 @@
             <!-- 오른쪽: 수익 계산 -->
             <div class="profit-calculation">
                 <div class="profit-results">
-                    <div class="profit-row">
-                        <span class="profit-label">현재가:</span>
-                        <span class="profit-value" id="currentPrice">로딩중...</span>
-                    </div>
                     <div class="profit-row">
                         <span class="profit-label">수익률:</span>
                         <span class="profit-value" id="profitRate">-</span>
@@ -446,7 +454,7 @@
 
     async function fetchTeslaPrice() {
         try {
-            document.getElementById('currentPrice').textContent = '업데이트 중...';
+            document.getElementById('currentPriceMarket').textContent = '업데이트 중...';
             
             const response = await fetch(PRIVATE_TSLA_URL, {
                 method: 'GET',
@@ -481,12 +489,20 @@
             }
             
             if (currentPrice && !isNaN(currentPrice)) {
-                document.getElementById('currentPrice').textContent = '$' + currentPrice.toFixed(2);
+                // 현재가 표시 (왼쪽 시장 정보에)
+                const currentPriceMarketEl = document.getElementById('currentPriceMarket');
+                currentPriceMarketEl.textContent = '$' + currentPrice.toFixed(2);
+                
+                // 등락에 따른 색상 적용
+                const isPositive = !(data.mod || '').includes('-');
+                currentPriceMarketEl.className = 'market-value ' + (isPositive ? 'price-positive' : 'price-negative');
+                
                 document.getElementById('updateTime').textContent = '업데이트: ' + new Date().toLocaleTimeString('ko-KR');
                 
                 // 시장 정보 표시
                 document.getElementById('marketInfo').textContent = data.market || '-';
                 document.getElementById('changeInfo').textContent = data.mod || '-';
+                document.getElementById('changeInfo').className = 'market-value ' + ((data.mod || '').includes('-') ? 'profit-negative' : 'profit-positive');
                 document.getElementById('pctInfo').textContent = data.pct || '-';
                 document.getElementById('pctInfo').className = 'market-value ' + ((data.pct || '').includes('-') ? 'profit-negative' : 'profit-positive');
                 document.getElementById('timeInfo').textContent = data.time || '-';
@@ -515,8 +531,8 @@
                 errorDetail = error.message;
             }
             
-            const currentPriceEl = document.getElementById('currentPrice');
-            currentPriceEl.innerHTML = '<span style="color: #ef5350; cursor: pointer; text-decoration: underline;" onclick="showLastResponse()" title="클릭하면 응답 전문 보기">조회 실패 (클릭)</span>';
+            const currentPriceMarketEl = document.getElementById('currentPriceMarket');
+            currentPriceMarketEl.innerHTML = '<span style="color: #ef5350; cursor: pointer; text-decoration: underline;" onclick="showLastResponse()" title="클릭하면 응답 전문 보기">조회 실패</span>';
             document.getElementById('updateTime').innerHTML = 
                 '<span style="color: #ef5350;">' + errorDetail + '</span>';
         }
@@ -525,7 +541,7 @@
     function calculateProfit(currentPrice) {
         // 현재 가격이 없으면 화면에서 가져오기
         if (!currentPrice || isNaN(currentPrice)) {
-            const currentPriceText = document.getElementById('currentPrice').textContent;
+            const currentPriceText = document.getElementById('currentPriceMarket').textContent;
             if (currentPriceText && currentPriceText.startsWith('$')) {
                 currentPrice = parseFloat(currentPriceText.replace('$', ''));
             }
