@@ -348,6 +348,10 @@
                     <span class="market-label">시간:</span>
                     <span class="market-value" id="timeInfo">-</span>
                 </div>
+                <div class="market-row" style="margin-top: 8px;">
+                    <span class="market-label">상태:</span>
+                    <span class="market-value" id="statusInfo">-</span>
+                </div>
             </div>
             
             <!-- 오른쪽: 수익 계산 -->
@@ -454,7 +458,9 @@
 
     async function fetchTeslaPrice() {
         try {
-            document.getElementById('currentPriceMarket').textContent = '업데이트 중...';
+            // 상태를 업데이트 중으로 변경, 현재가는 유지
+            document.getElementById('statusInfo').textContent = '업데이트 중...';
+            document.getElementById('statusInfo').style.color = '#ffd700';
             
             const response = await fetch(PRIVATE_TSLA_URL, {
                 method: 'GET',
@@ -507,6 +513,10 @@
                 document.getElementById('pctInfo').className = 'market-value ' + ((data.pct || '').includes('-') ? 'profit-negative' : 'profit-positive');
                 document.getElementById('timeInfo').textContent = data.time || '-';
                 
+                // 상태 업데이트 - 성공
+                document.getElementById('statusInfo').textContent = '조회 성공';
+                document.getElementById('statusInfo').style.color = '#00e676';
+                
                 // 수익 계산 실행
                 setTimeout(() => calculateProfit(currentPrice), 100);
                 
@@ -531,8 +541,9 @@
                 errorDetail = error.message;
             }
             
-            const currentPriceMarketEl = document.getElementById('currentPriceMarket');
-            currentPriceMarketEl.innerHTML = '<span style="color: #ef5350; cursor: pointer; text-decoration: underline;" onclick="showLastResponse()" title="클릭하면 응답 전문 보기">조회 실패</span>';
+            // 상태 업데이트 - 실패, 현재가는 유지
+            const statusInfoEl = document.getElementById('statusInfo');
+            statusInfoEl.innerHTML = '<span style="color: #ef5350; cursor: pointer; text-decoration: underline;" onclick="showLastResponse()" title="클릭하면 응답 전문 보기">조회 실패 (클릭)</span>';
             document.getElementById('updateTime').innerHTML = 
                 '<span style="color: #ef5350;">' + errorDetail + '</span>';
         }
