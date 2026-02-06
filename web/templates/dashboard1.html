@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kay's Stock Dashboard - 6 Split Layout</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { 
+            margin: 0; 
+            padding: 0; 
+            background-color: #131722; 
+            color: #fff; 
+            font-family: sans-serif; 
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            height: 100%;
+            width: 100%;
+            gap: 2px;
+            background-color: #000;
+        }
+        .chart-box {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background-color: #131722;
+            overflow: hidden;
+        }
+        .input-group {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            z-index: 10;
+            background: rgba(0, 0, 0, 0.85);
+            padding: 6px;
+            border-radius: 4px;
+            display: flex;
+            gap: 5px;
+            max-width: calc(100% - 16px);
+        }
+        input {
+            background: #2a2e39;
+            border: 1px solid #434651;
+            color: #fff;
+            padding: 4px 6px;
+            border-radius: 3px;
+            text-transform: uppercase;
+            font-weight: bold;
+            width: 75px;
+            font-size: 11px;
+        }
+        input[type="number"] {
+            width: 65px;
+            text-transform: none;
+        }
+        button {
+            background: #2962ff;
+            border: none;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 10px;
+        }
+        button:hover { background: #1e53e5; }
+        .tradingview-widget-container { 
+            height: 100%; 
+            width: 100%;
+        }
+        
+        /* 수익 계산 패널 스타일 */
+        .profit-box {
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+            background-color: #1a1d29;
+        }
+        .profit-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #fff;
+            border-bottom: 2px solid #2962ff;
+            padding-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .realtime-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            font-weight: normal;
+        }
+        .realtime-toggle input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+        }
+        .countdown-timer {
+            font-family: monospace;
+            font-size: 13px;
+            color: #ffd700;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 2px 8px;
+            border-radius: 3px;
+            min-width: 50px;
+            text-align: center;
+        }
+        .countdown-timer.paused {
+            color: #666;
+        }
+        .profit-content {
+            display: flex;
+            gap: 15px;
+            height: calc(100% - 50px);
+        }
+        .market-info {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .market-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            padding: 5px 0;
+            border-bottom: 1px solid #333;
+        }
+        .market-row:last-child {
+            border-bottom: none;
+        }
+        .market-label {
+            color: #9ca3af;
+        }
+        .market-value {
+            font-weight: bold;
+            font-family: monospace;
+        }
+        .profit-calculation {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .profit-inputs {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+        .profit-input-group {
+            flex: 1;
+        }
+        .profit-input-group input {
+            width: 100%;
+            font-size: 12px;
+            padding: 6px;
+        }
+        .input-row {
+            display: flex;
+            align-items: flex-end;
+            gap: 6px;
+        }
+        .input-row > div {
+            flex: 1;
+        }
+        .exchange-rate-inline {
+            max-width: 80px;
+        }
+        .profit-input-group label {
+            display: block;
+            color: #9ca3af;
+            font-size: 11px;
+            margin-bottom: 5px;
+        }
+        .profit-input-group input {
+            width: 100%;
+            font-size: 14px;
+            padding: 8px;
+        }
+        .profit-results {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .profit-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+        }
+        .profit-label {
+            color: #9ca3af;
+            font-size: 13px;
+        }
+        .profit-value {
+            font-weight: bold;
+            font-family: monospace;
+            font-size: 15px;
+        }
+        .profit-positive {
+            color: #26a69a;
+        }
+        .profit-negative {
+            color: #ef5350;
+        }
+        .update-time {
+            font-size: 10px;
+            color: #666;
+            text-align: right;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #333;
+        }
+        .realtime-badge {
+            display: inline-block;
+            background: #26a69a;
+            color: white;
+            font-size: 9px;
+            padding: 2px 6px;
+            border-radius: 3px;
+            margin-left: 5px;
+        }
+        .save-btn {
+            align-self: flex-end;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Row 1: TSLA | QQQ | USDKRW -->
+    <div class="chart-box" id="box1">
+        <div class="input-group">
+            <input type="text" id="input1" value="VANTAGE:TSLA" onkeypress="handleEnter(event, 1)">
+            <button onclick="updateChart(1)">Change</button>
+        </div>
+        <div id="chart1" class="tradingview-widget-container"></div>
+    </div>
+
+    <div class="chart-box" id="box2">
+        <div class="input-group">
+            <input type="text" id="input2" value="VANTAGE:QQQ" onkeypress="handleEnter(event, 2)">
+            <button onclick="updateChart(2)">Change</button>
+        </div>
+        <div id="chart2" class="tradingview-widget-container"></div>
+    </div>
+
+    <div class="chart-box" id="box3">
+        <div class="input-group">
+            <input type="text" id="input3" value="FX_IDC:USDKRW" onkeypress="handleEnter(event, 3)">
+            <button onclick="updateChart(3)">Change</button>
+        </div>
+        <div id="chart3" class="tradingview-widget-container"></div>
+    </div>
+
+    <!-- Row 2: 수익계산 | BTC | AAPL -->
+    <div class="chart-box profit-box" id="box4">
+        <div class="profit-title">
+            <span>TSLA 수익 계산</span>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <button onclick="saveProfitData()" style="padding: 4px 10px; font-size: 11px; height: 24px;">저장</button>
+                <label class="realtime-toggle">
+                    <span class="countdown-timer" id="countdownTimer">05:00</span>
+                    <input type="checkbox" id="realtimeToggle" checked onchange="toggleRealtime()">
+                    <span>실시간</span>
+                </label>
+            </div>
+        </div>
+        
+        <div class="profit-inputs">
+            <!-- 첫 번째 매입가/주식수/환율 + 저장버튼 -->
+            <div class="input-row">
+                <input type="radio" id="selectSet1" name="priceSet" value="1" checked onchange="calculateProfit()" style="width: auto; margin-bottom: 8px; flex-shrink: 0;">
+                <div class="profit-input-group">
+                    <label>매입가 ($)</label>
+                    <input type="number" id="buyPrice1" placeholder="350.00" step="0.01" onchange="calculateProfit()">
+                </div>
+                <div class="profit-input-group">
+                    <label>주식수</label>
+                    <input type="number" id="shareCount1" placeholder="100" step="1" onchange="calculateProfit()">
+                </div>
+                <div class="profit-input-group exchange-rate-inline">
+                    <label>환율</label>
+                    <input type="number" id="exchangeRate1" placeholder="1470" step="1" value="1470" onchange="calculateProfit()">
+                </div>
+            </div>
+            
+            <!-- 두 번째 매입가/주식수/환율 -->
+            <div class="input-row">
+                <input type="radio" id="selectSet2" name="priceSet" value="2" onchange="calculateProfit()" style="width: auto; margin-bottom: 8px; flex-shrink: 0;">
+                <div class="profit-input-group">
+                    <input type="number" id="buyPrice2" placeholder="300.00" step="0.01" onchange="calculateProfit()">
+                </div>
+                <div class="profit-input-group">
+                    <input type="number" id="shareCount2" placeholder="50" step="1" onchange="calculateProfit()">
+                </div>
+                <div class="profit-input-group exchange-rate-inline">
+                    <input type="number" id="exchangeRate2" placeholder="1470" step="1" value="1470" onchange="calculateProfit()">
+                </div>
+            </div>
+            
+        </div>
+        
+        <div class="profit-content">
+            <!-- 왼쪽: 시장 정보 -->
+            <div class="market-info">
+                <div class="market-row">
+                    <span class="market-label">시장:</span>
+                    <span class="market-value" id="marketInfo">-</span>
+                </div>
+                <div class="market-row">
+                    <span class="market-label">등락:</span>
+                    <span class="market-value" id="changeInfo">-</span>
+                </div>
+                <div class="market-row">
+                    <span class="market-label">등락률:</span>
+                    <span class="market-value" id="pctInfo">-</span>
+                </div>
+                <div class="market-row">
+                    <span class="market-label">시간:</span>
+                    <span class="market-value" id="timeInfo">-</span>
+                </div>
+            </div>
+            
+            <!-- 오른쪽: 수익 계산 -->
+            <div class="profit-calculation">
+                <div class="profit-results">
+                    <div class="profit-row">
+                        <span class="profit-label">현재가:</span>
+                        <span class="profit-value" id="currentPrice">로딩중...</span>
+                    </div>
+                    <div class="profit-row">
+                        <span class="profit-label">수익률:</span>
+                        <span class="profit-value" id="profitRate">-</span>
+                    </div>
+                    <div class="profit-row">
+                        <span class="profit-label">수익금액 (USD):</span>
+                        <span class="profit-value" id="profitAmount">-</span>
+                    </div>
+                    <div class="profit-row">
+                        <span class="profit-label">수익금액 (KRW):</span>
+                        <span class="profit-value" id="profitAmountKRW" style="color: #ffd700;">-</span>
+                    </div>
+                    <div class="profit-row">
+                        <span class="profit-label">평가금액 (USD):</span>
+                        <span class="profit-value" id="totalValue">-</span>
+                    </div>
+                    <div class="profit-row">
+                        <span class="profit-label">평가금액 (KRW):</span>
+                        <span class="profit-value" id="totalValueKRW" style="color: #ffd700;">-</span>
+                    </div>
+                </div>
+                
+                <div class="update-time" id="updateTime">-</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="chart-box" id="box5">
+        <div class="input-group">
+            <input type="text" id="input5" value="BINANCE:BTCUSDT" onkeypress="handleEnter(event, 5)">
+            <button onclick="updateChart(5)">Change</button>
+        </div>
+        <div id="chart5" class="tradingview-widget-container"></div>
+    </div>
+
+    <div class="chart-box" id="box6">
+        <div class="input-group">
+            <input type="text" id="input6" value="NASDAQ:AAPL" onkeypress="handleEnter(event, 6)">
+            <button onclick="updateChart(6)">Change</button>
+        </div>
+        <div id="chart6" class="tradingview-widget-container"></div>
+    </div>
+</div>
+
+<script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+<script>
+    // PRIVATE URL - 같은 서버 내 상대 경로 사용
+    const PRIVATE_TSLA_URL = '/tsla';
+    
+    function createWidget(containerId, symbol) {
+        document.getElementById(containerId).innerHTML = "";
+        new TradingView.widget({
+            "autosize": true,
+            "symbol": symbol,
+            "interval": "1",
+            "timezone": "Asia/Seoul",
+            "theme": "dark",
+            "style": "1",
+            "locale": "kr",
+            "toolbar_bg": "#f1f3f6",
+            "enable_publishing": false,
+            "hide_top_toolbar": false,
+            "allow_symbol_change": true,
+            "hide_legend": false,
+            "save_image": false,
+            "container_id": containerId
+        });
+    }
+
+    window.onload = function() {
+        document.getElementById('input1').value = "VANTAGE:TSLA";
+        document.getElementById('input2').value = "VANTAGE:QQQ";
+        document.getElementById('input3').value = "FX_IDC:USDKRW";
+        document.getElementById('input5').value = "BINANCE:BTCUSDT";
+        document.getElementById('input6').value = "NASDAQ:AAPL";
+
+        updateChart(1);
+        updateChart(2);
+        updateChart(3);
+        updateChart(5);
+        updateChart(6);
+
+        loadProfitData();
+        fetchTeslaPrice();
+        window.priceUpdateInterval = setInterval(fetchTeslaPrice, 300000);
+        startCountdown();
+    };
+
+    function updateChart(id) {
+        const symbol = document.getElementById('input' + id).value;
+        createWidget('chart' + id, symbol);
+    }
+
+    function handleEnter(e, id) {
+        if (e.key === 'Enter') {
+            updateChart(id);
+        }
+    }
+
+    async function fetchTeslaPrice() {
+        try {
+            document.getElementById('currentPrice').textContent = '업데이트 중...';
+            
+            const response = await fetch(PRIVATE_TSLA_URL, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            
+            const data = await response.json();
+            
+            // 디버깅: 전체 응답 저장
+            window.lastResponse = data;
+            
+            let currentPrice;
+            
+            // 서버 응답 형식: {'market': 'OverN', 'price': '394.89', 'mod': '-2.32', 'pct': '-0.58%', 'time': '16:55 02/06 KST'}
+            if (data.price) {
+                currentPrice = parseFloat(data.price);
+            } else if (typeof data === 'number') {
+                currentPrice = data;
+            } else if (data.currentPrice) {
+                currentPrice = parseFloat(data.currentPrice);
+            } else if (data.lastPrice) {
+                currentPrice = parseFloat(data.lastPrice);
+            } else {
+                const values = Object.values(data).filter(v => typeof v === 'number');
+                currentPrice = values[0];
+            }
+            
+            if (currentPrice && !isNaN(currentPrice)) {
+                document.getElementById('currentPrice').textContent = '$' + currentPrice.toFixed(2);
+                document.getElementById('updateTime').textContent = '업데이트: ' + new Date().toLocaleTimeString('ko-KR');
+                
+                // 시장 정보 표시
+                document.getElementById('marketInfo').textContent = data.market || '-';
+                document.getElementById('changeInfo').textContent = data.mod || '-';
+                document.getElementById('pctInfo').textContent = data.pct || '-';
+                document.getElementById('pctInfo').className = 'market-value ' + ((data.pct || '').includes('-') ? 'profit-negative' : 'profit-positive');
+                document.getElementById('timeInfo').textContent = data.time || '-';
+                
+                // 수익 계산 실행
+                setTimeout(() => calculateProfit(currentPrice), 100);
+                
+                // 타이머 리셋 (실시간 ON일 때만)
+                if (document.getElementById('realtimeToggle').checked) {
+                    window.remainingSeconds = 300;
+                }
+            } else {
+                throw new Error('Price data not found or invalid: ' + JSON.stringify(data));
+            }
+        } catch (error) {
+            console.error('실시간 주가 조회 실패:', error);
+            
+            let errorDetail = '';
+            if (error.message.includes('NetworkError') || error.message.includes('Failed to fetch')) {
+                errorDetail = '서버 연결 실패';
+            } else if (error.message.includes('404')) {
+                errorDetail = '404 Not Found';
+            } else if (error.message.includes('CORS')) {
+                errorDetail = 'CORS 차단';
+            } else {
+                errorDetail = error.message;
+            }
+            
+            const currentPriceEl = document.getElementById('currentPrice');
+            currentPriceEl.innerHTML = '<span style="color: #ef5350; cursor: pointer; text-decoration: underline;" onclick="showLastResponse()" title="클릭하면 응답 전문 보기">조회 실패 (클릭)</span>';
+            document.getElementById('updateTime').innerHTML = 
+                '<span style="color: #ef5350;">' + errorDetail + '</span>';
+        }
+    }
+
+    function calculateProfit(currentPrice) {
+        // 현재 가격이 없으면 화면에서 가져오기
+        if (!currentPrice || isNaN(currentPrice)) {
+            const currentPriceText = document.getElementById('currentPrice').textContent;
+            if (currentPriceText && currentPriceText.startsWith('$')) {
+                currentPrice = parseFloat(currentPriceText.replace('$', ''));
+            }
+        }
+        
+        // 선택된 세트 확인
+        const selectedSet = document.querySelector('input[name="priceSet"]:checked')?.value || '1';
+        
+        // 선택된 세트의 입력값 가져오기
+        const buyPriceInput = document.getElementById('buyPrice' + selectedSet);
+        const shareCountInput = document.getElementById('shareCount' + selectedSet);
+        const exchangeRateInlineInput = document.getElementById('exchangeRate' + selectedSet);
+        
+        if (!buyPriceInput || !shareCountInput) {
+            console.error('Selected input elements not found for set ' + selectedSet);
+            return;
+        }
+        
+        // 입력값이 비어있으면 0으로 처리하지 않고 리턴
+        const buyPriceValue = buyPriceInput.value.trim();
+        const shareCountValue = shareCountInput.value.trim();
+        // 인라인 환율 사용
+        const exchangeRateValue = exchangeRateInlineInput?.value.trim() || '1470';
+        
+        if (!buyPriceValue || !shareCountValue) {
+            document.getElementById('profitRate').textContent = '입력 필요';
+            document.getElementById('profitAmount').textContent = '-';
+            document.getElementById('profitAmountKRW').textContent = '-';
+            document.getElementById('totalValue').textContent = '-';
+            document.getElementById('totalValueKRW').textContent = '-';
+            console.log('Please enter buy price and share count for set ' + selectedSet);
+            return;
+        }
+        
+        const buyPrice = parseFloat(buyPriceValue);
+        const shareCount = parseInt(shareCountValue);
+        const exchangeRate = parseInt(exchangeRateValue);
+        
+        console.log('Calculating profit for set ' + selectedSet + ':', { buyPrice, shareCount, currentPrice, exchangeRate });
+        
+        if (isNaN(buyPrice) || isNaN(shareCount) || !currentPrice || isNaN(currentPrice) || isNaN(exchangeRate)) {
+            document.getElementById('profitRate').textContent = '현재가 로딩중';
+            document.getElementById('profitAmount').textContent = '-';
+            document.getElementById('profitAmountKRW').textContent = '-';
+            document.getElementById('totalValue').textContent = '-';
+            document.getElementById('totalValueKRW').textContent = '-';
+            console.log('Waiting for current price to load...');
+            return;
+        }
+        
+        const profitPerShare = currentPrice - buyPrice;
+        const totalProfit = profitPerShare * shareCount;
+        const profitRate = (profitPerShare / buyPrice) * 100;
+        const totalValue = currentPrice * shareCount;
+        
+        const profitRateElement = document.getElementById('profitRate');
+        profitRateElement.textContent = (profitRate >= 0 ? '+' : '') + profitRate.toFixed(2) + '%';
+        profitRateElement.className = 'profit-value ' + (profitRate >= 0 ? 'profit-positive' : 'profit-negative');
+        
+        const profitAmountElement = document.getElementById('profitAmount');
+        profitAmountElement.textContent = (totalProfit >= 0 ? '+' : '') + '$' + totalProfit.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+        profitAmountElement.className = 'profit-value ' + (totalProfit >= 0 ? 'profit-positive' : 'profit-negative');
+        
+        // 수익금액 원화 계산
+        const totalProfitKRW = totalProfit * exchangeRate;
+        const profitAmountKRWElement = document.getElementById('profitAmountKRW');
+        profitAmountKRWElement.textContent = (totalProfitKRW >= 0 ? '+' : '') + '₩' + totalProfitKRW.toLocaleString('ko-KR', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+        profitAmountKRWElement.className = 'profit-value ' + (totalProfitKRW >= 0 ? 'profit-positive' : 'profit-negative');
+        
+        document.getElementById('totalValue').textContent = '$' + totalValue.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+        
+        // 평가금액 원화 계산
+        const totalValueKRW = totalValue * exchangeRate;
+        document.getElementById('totalValueKRW').textContent = '₩' + totalValueKRW.toLocaleString('ko-KR', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+    }
+
+    function saveProfitData() {
+        const buyPrice1 = document.getElementById('buyPrice1').value;
+        const shareCount1 = document.getElementById('shareCount1').value;
+        const exchangeRate1 = document.getElementById('exchangeRate1').value;
+        const buyPrice2 = document.getElementById('buyPrice2').value;
+        const shareCount2 = document.getElementById('shareCount2').value;
+        const exchangeRate2 = document.getElementById('exchangeRate2').value;
+        const selectedSet = document.querySelector('input[name="priceSet"]:checked')?.value || '1';
+        
+        localStorage.setItem('tsla_buyPrice1', buyPrice1);
+        localStorage.setItem('tsla_shareCount1', shareCount1);
+        localStorage.setItem('tsla_exchangeRate1', exchangeRate1);
+        localStorage.setItem('tsla_buyPrice2', buyPrice2);
+        localStorage.setItem('tsla_shareCount2', shareCount2);
+        localStorage.setItem('tsla_exchangeRate2', exchangeRate2);
+        localStorage.setItem('tsla_selectedSet', selectedSet);
+        
+        alert('저장되었습니다! (세트 1, 2 및 환율 모두 저장)');
+        
+        // 현재 표시된 가격으로 즉시 계산
+        const currentPriceText = document.getElementById('currentPrice').textContent;
+        if (currentPriceText && currentPriceText.startsWith('$')) {
+            const currentPrice = parseFloat(currentPriceText.replace('$', ''));
+            calculateProfit(currentPrice);
+        } else {
+            fetchTeslaPrice(); // 가격이 없으면 새로 조회
+        }
+    }
+
+    function loadProfitData() {
+        const savedBuyPrice1 = localStorage.getItem('tsla_buyPrice1');
+        const savedShareCount1 = localStorage.getItem('tsla_shareCount1');
+        const savedExchangeRate1 = localStorage.getItem('tsla_exchangeRate1');
+        const savedBuyPrice2 = localStorage.getItem('tsla_buyPrice2');
+        const savedShareCount2 = localStorage.getItem('tsla_shareCount2');
+        const savedExchangeRate2 = localStorage.getItem('tsla_exchangeRate2');
+        const savedSelectedSet = localStorage.getItem('tsla_selectedSet');
+        
+        if (savedBuyPrice1) {
+            document.getElementById('buyPrice1').value = savedBuyPrice1;
+        }
+        if (savedShareCount1) {
+            document.getElementById('shareCount1').value = savedShareCount1;
+        }
+        if (savedExchangeRate1) {
+            document.getElementById('exchangeRate1').value = savedExchangeRate1;
+        }
+        if (savedBuyPrice2) {
+            document.getElementById('buyPrice2').value = savedBuyPrice2;
+        }
+        if (savedShareCount2) {
+            document.getElementById('shareCount2').value = savedShareCount2;
+        }
+        if (savedExchangeRate2) {
+            document.getElementById('exchangeRate2').value = savedExchangeRate2;
+        }
+        if (savedSelectedSet) {
+            document.getElementById('selectSet' + savedSelectedSet).checked = true;
+        } else {
+            document.getElementById('selectSet1').checked = true;
+        }
+    }
+
+    // 마지막 응답 전문 보기
+    function showLastResponse() {
+        if (window.lastResponse) {
+            const jsonStr = JSON.stringify(window.lastResponse, null, 2);
+            alert('마지막 서버 응답:\n\n' + jsonStr);
+            console.log('Last Response:', window.lastResponse);
+        } else {
+            alert('저장된 응답이 없습니다.');
+        }
+    }
+
+    // 카운트다운 타이머 변수
+    window.countdownInterval = null;
+    window.remainingSeconds = 300; // 5분 = 300초
+
+    // 카운트다운 타이머 시작
+    function startCountdown() {
+        stopCountdown();
+        window.remainingSeconds = 300;
+        updateTimerDisplay();
+        
+        window.countdownInterval = setInterval(() => {
+            window.remainingSeconds--;
+            if (window.remainingSeconds <= 0) {
+                window.remainingSeconds = 300; // 다시 5분으로 리셋
+            }
+            updateTimerDisplay();
+        }, 1000);
+    }
+
+    // 카운트다운 타이머 중지
+    function stopCountdown() {
+        if (window.countdownInterval) {
+            clearInterval(window.countdownInterval);
+            window.countdownInterval = null;
+        }
+    }
+
+    // 타이머 화면 업데이트
+    function updateTimerDisplay() {
+        const minutes = Math.floor(window.remainingSeconds / 60);
+        const seconds = window.remainingSeconds % 60;
+        const display = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        document.getElementById('countdownTimer').textContent = display;
+    }
+
+    // 실시간 업데이트 토글
+    function toggleRealtime() {
+        const isRealtime = document.getElementById('realtimeToggle').checked;
+        const timerElement = document.getElementById('countdownTimer');
+        
+        if (isRealtime) {
+            // 실시간 ON: 인터벌 재시작
+            if (!window.priceUpdateInterval) {
+                window.priceUpdateInterval = setInterval(fetchTeslaPrice, 300000);
+                fetchTeslaPrice(); // 즉시 한 번 조회
+            }
+            startCountdown();
+            timerElement.classList.remove('paused');
+            document.getElementById('updateTime').textContent = '실시간 업데이트 ON';
+        } else {
+            // 실시간 OFF: 인터벌 중지
+            if (window.priceUpdateInterval) {
+                clearInterval(window.priceUpdateInterval);
+                window.priceUpdateInterval = null;
+            }
+            stopCountdown();
+            timerElement.classList.add('paused');
+            document.getElementById('updateTime').textContent = '실시간 업데이트 OFF (수동 새로고침 필요)';
+        }
+    }
+</script>
+
+</body>
+</html>
