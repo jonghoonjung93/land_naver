@@ -427,11 +427,8 @@
     }
 
     window.onload = function() {
-        document.getElementById('input1').value = "VANTAGE:TSLA";
-        document.getElementById('input2').value = "VANTAGE:QQQ";
-        document.getElementById('input3').value = "FX_IDC:USDKRW";
-        document.getElementById('input5').value = "BINANCE:BTCUSDT";
-        document.getElementById('input6').value = "NASDAQ:AAPL";
+        // localStorage에서 저장된 차트 심볼 불러오기
+        loadChartSymbols();
 
         updateChart(1);
         updateChart(2);
@@ -445,8 +442,31 @@
         startCountdown();
     };
 
+    // 차트 심볼 저장
+    function saveChartSymbol(chartNum, symbol) {
+        localStorage.setItem('chart_symbol_' + chartNum, symbol);
+    }
+
+    // 차트 심볼 불러오기
+    function loadChartSymbols() {
+        const symbols = {
+            1: localStorage.getItem('chart_symbol_1') || 'VANTAGE:TSLA',
+            2: localStorage.getItem('chart_symbol_2') || 'VANTAGE:QQQ',
+            3: localStorage.getItem('chart_symbol_3') || 'FX_IDC:USDKRW',
+            5: localStorage.getItem('chart_symbol_5') || 'BINANCE:BTCUSDT',
+            6: localStorage.getItem('chart_symbol_6') || 'NASDAQ:AAPL'
+        };
+
+        document.getElementById('input1').value = symbols[1];
+        document.getElementById('input2').value = symbols[2];
+        document.getElementById('input3').value = symbols[3];
+        document.getElementById('input5').value = symbols[5];
+        document.getElementById('input6').value = symbols[6];
+    }
+
     function updateChart(id) {
         const symbol = document.getElementById('input' + id).value;
+        saveChartSymbol(id, symbol); // 심볼 변경 시 자동 저장
         createWidget('chart' + id, symbol);
     }
 
