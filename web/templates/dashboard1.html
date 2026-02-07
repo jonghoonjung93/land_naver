@@ -52,11 +52,11 @@
             border-radius: 3px;
             text-transform: uppercase;
             font-weight: bold;
-            width: 75px;
+            width: 150px;
             font-size: 11px;
         }
         input[type="number"] {
-            width: 65px;
+            width: 130px;
             text-transform: none;
         }
         button {
@@ -226,6 +226,40 @@
             color: #ef5350;
             font-weight: bold;
         }
+        
+        /* 입력 히스토리 드롭다운 스타일 */
+        .input-history-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #1a1d29;
+            border: 1px solid #434651;
+            border-radius: 4px;
+            margin-top: 2px;
+            max-height: 150px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+        }
+        .input-history-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            color: #fff;
+            font-size: 12px;
+            border-bottom: 1px solid #333;
+        }
+        .input-history-item:hover {
+            background: #2962ff;
+        }
+        .input-history-item:last-child {
+            border-bottom: none;
+        }
+        .input-history-empty {
+            padding: 8px 12px;
+            color: #666;
+            font-size: 11px;
+        }
         .update-time {
             font-size: 10px;
             color: #666;
@@ -254,24 +288,27 @@
 <div class="container">
     <!-- Row 1: TSLA | QQQ | USDKRW -->
     <div class="chart-box" id="box1">
-        <div class="input-group">
-            <input type="text" id="input1" value="VANTAGE:TSLA" onkeypress="handleEnter(event, 1)">
+        <div class="input-group" style="position: relative;">
+            <input type="text" id="input1" value="VANTAGE:TSLA" onkeypress="handleEnter(event, 1)" onclick="showHistoryDropdown('input1')" onblur="hideHistoryDropdown('input1')" autocomplete="off">
+            <div id="input1_history" class="input-history-dropdown"></div>
             <button onclick="updateChart(1)">Change</button>
         </div>
         <div id="chart1" class="tradingview-widget-container"></div>
     </div>
 
     <div class="chart-box" id="box2">
-        <div class="input-group">
-            <input type="text" id="input2" value="VANTAGE:QQQ" onkeypress="handleEnter(event, 2)">
+        <div class="input-group" style="position: relative;">
+            <input type="text" id="input2" value="VANTAGE:QQQ" onkeypress="handleEnter(event, 2)" onclick="showHistoryDropdown('input2')" onblur="hideHistoryDropdown('input2')" autocomplete="off">
+            <div id="input2_history" class="input-history-dropdown"></div>
             <button onclick="updateChart(2)">Change</button>
         </div>
         <div id="chart2" class="tradingview-widget-container"></div>
     </div>
 
     <div class="chart-box" id="box3">
-        <div class="input-group">
-            <input type="text" id="input3" value="FX_IDC:USDKRW" onkeypress="handleEnter(event, 3)">
+        <div class="input-group" style="position: relative;">
+            <input type="text" id="input3" value="FX_IDC:USDKRW" onkeypress="handleEnter(event, 3)" onclick="showHistoryDropdown('input3')" onblur="hideHistoryDropdown('input3')" autocomplete="off">
+            <div id="input3_history" class="input-history-dropdown"></div>
             <button onclick="updateChart(3)">Change</button>
         </div>
         <div id="chart3" class="tradingview-widget-container"></div>
@@ -385,16 +422,18 @@
     </div>
 
     <div class="chart-box" id="box5">
-        <div class="input-group">
-            <input type="text" id="input5" value="BINANCE:BTCUSDT" onkeypress="handleEnter(event, 5)">
+        <div class="input-group" style="position: relative;">
+            <input type="text" id="input5" value="BINANCE:BTCUSDT" onkeypress="handleEnter(event, 5)" onclick="showHistoryDropdown('input5')" onblur="hideHistoryDropdown('input5')" autocomplete="off">
+            <div id="input5_history" class="input-history-dropdown"></div>
             <button onclick="updateChart(5)">Change</button>
         </div>
         <div id="chart5" class="tradingview-widget-container"></div>
     </div>
 
     <div class="chart-box" id="box6">
-        <div class="input-group">
-            <input type="text" id="input6" value="NASDAQ:AAPL" onkeypress="handleEnter(event, 6)">
+        <div class="input-group" style="position: relative;">
+            <input type="text" id="input6" value="NASDAQ:AAPL" onkeypress="handleEnter(event, 6)" onclick="showHistoryDropdown('input6')" onblur="hideHistoryDropdown('input6')" autocomplete="off">
+            <div id="input6_history" class="input-history-dropdown"></div>
             <button onclick="updateChart(6)">Change</button>
         </div>
         <div id="chart6" class="tradingview-widget-container"></div>
@@ -445,7 +484,86 @@
     // 차트 심볼 저장
     function saveChartSymbol(chartNum, symbol) {
         localStorage.setItem('chart_symbol_' + chartNum, symbol);
+        // 히스토리에도 저장
+        addToTickerHistory(symbol);
     }
+
+    // 티커 히스토리 관리
+    function addToTickerHistory(symbol) {
+        if (!symbol || symbol.trim() === '') return;
+        
+        let history = JSON.parse(localStorage.getItem('ticker_history') || '[]');
+        
+        // 중복 제거
+        history = history.filter(item => item !== symbol);
+        
+        // 맨 앞에 추가
+        history.unshift(symbol);
+        
+        // 최신 20개만 유지
+        history = history.slice(0, 20);
+        
+        localStorage.setItem('ticker_history', JSON.stringify(history));
+    }
+
+    function getTickerHistory() {
+        return JSON.parse(localStorage.getItem('ticker_history') || '[]');
+    }
+
+    // 히스토리 드롭다운 표시
+    function showHistoryDropdown(inputId) {
+        const input = document.getElementById(inputId);
+        const dropdown = document.getElementById(inputId + '_history');
+        const history = getTickerHistory();
+        
+        if (history.length === 0) {
+            dropdown.innerHTML = '<div class="input-history-empty">히스토리 없음</div>';
+        } else {
+            dropdown.innerHTML = history.map(item => 
+                `<div class="input-history-item" onclick="selectHistoryItem('${inputId}', '${item}')">${item}</div>`
+            ).join('');
+        }
+        
+        dropdown.style.display = 'block';
+    }
+
+    // 히스토리 항목 선택
+    function selectHistoryItem(inputId, value) {
+        document.getElementById(inputId).value = value;
+        document.getElementById(inputId + '_history').style.display = 'none';
+        
+        // 차트 번호 추출 (input1, input2, ...)
+        const chartNum = inputId.replace('input', '');
+        updateChart(parseInt(chartNum));
+    }
+
+    // 히스토리 드롭다운 숨기기
+    function hideHistoryDropdown(inputId) {
+        setTimeout(() => {
+            document.getElementById(inputId + '_history').style.display = 'none';
+        }, 200); // 클릭 이벤트가 처리될 시간을 줌
+    }
+
+    // 모든 드롭다운 닫기
+    function hideAllDropdowns() {
+        document.querySelectorAll('.input-history-dropdown').forEach(dropdown => {
+            dropdown.style.display = 'none';
+        });
+    }
+
+    // ESC 키로 모든 드롭다운 닫기
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            hideAllDropdowns();
+        }
+    });
+
+    // 외부 클릭 시 드롭다운 닫기
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.input-group')) {
+            hideAllDropdowns();
+        }
+    });
 
     // 차트 심볼 불러오기
     function loadChartSymbols() {
