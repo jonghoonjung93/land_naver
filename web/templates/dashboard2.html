@@ -865,6 +865,20 @@
         profitAmountKRWElement.textContent = (totalProfitKRW >= 0 ? "+" : "") + totalProfitKRW.toLocaleString("ko-KR", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
         profitAmountKRWElement.className = "profit-value " + (totalProfitKRW >= 0 ? "profit-positive" : "profit-negative");
 
+        // 양도세 계산 클릭 이벤트 추가
+        if (totalProfitKRW > 0) {
+          profitAmountKRWElement.style.cursor = "pointer";
+          profitAmountKRWElement.title = "클릭하여 양도세(22%) 확인";
+          profitAmountKRWElement.onclick = function () {
+            const taxAmount = Math.floor(totalProfitKRW * 0.22);
+            alert("양도소득세 (22%): " + taxAmount.toLocaleString("ko-KR") + "원\n" + "세후 수익: " + (totalProfitKRW - taxAmount).toLocaleString("ko-KR") + "원");
+          };
+        } else {
+          profitAmountKRWElement.style.cursor = "default";
+          profitAmountKRWElement.title = "";
+          profitAmountKRWElement.onclick = null;
+        }
+
         document.getElementById(boxId + "_totalValue").textContent = "$" + totalValue.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 
         // 평가금액 원화 계산
