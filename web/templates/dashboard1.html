@@ -317,17 +317,20 @@
     <!-- Row 2: 수익계산 | BTC | AAPL -->
     <div class="chart-box profit-box" id="box4">
         <div class="profit-title">
-            <span>TSLA 수익 계산</span>
+            <span id="box4-title">TSLA 수익 계산</span>
             <div style="display: flex; align-items: center; gap: 10px;">
+                <button id="toggleModeBtn" onclick="toggleBox4Mode()" style="padding: 4px 8px; font-size: 14px; height: 24px;" title="수익계산/차트 전환">💫</button>
                 <button onclick="saveProfitData()" style="padding: 4px 10px; font-size: 11px; height: 24px;">저장</button>
                 <label class="realtime-toggle">
                     <span class="countdown-timer" id="countdownTimer">05:00</span>
-                    <input type="checkbox" id="realtimeToggle" checked onchange="toggleRealtime()">
+                    <input type="checkbox" id="realtimeToggle" onchange="toggleRealtime()">
                     <span>실시간</span>
                 </label>
             </div>
         </div>
         
+        <!-- 수익계산 모드 -->
+        <div id="profitMode" class="mode-content">
         <div class="profit-inputs">
             <!-- 첫 번째 매입가/주식수/환율 + 저장버튼 -->
             <div class="input-row">
@@ -418,6 +421,17 @@
                 
                 <div class="update-time" id="updateTime">-</div>
             </div>
+        </div>
+    </div>
+        <!-- 차트 모드 (숨김 기본) -->
+        <div id="chartMode" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #131722; z-index: 5;">
+            <div class="input-group" style="position: relative; margin-bottom: 5px;">
+                <input type="text" id="input4" value="VANTAGE:TSLA" onkeypress="handleEnter(event, 4)" onclick="showHistoryDropdown('input4')" onblur="hideHistoryDropdown('input4')" autocomplete="off">
+                <div id="input4_history" class="input-history-dropdown"></div>
+                <button onclick="updateChart(4)">Change</button>
+                <button onclick="toggleBox4Mode()" style="padding: 4px 8px; font-size: 14px; margin-left: 5px;">💰</button>
+            </div>
+            <div id="chart4" class="tradingview-widget-container" style="height: calc(100% - 80px);"></div>
         </div>
     </div>
 
@@ -793,6 +807,24 @@
             calculateProfit(currentPrice);
         } else {
             fetchTeslaPrice(); // 가격이 없으면 새로 조회
+        }
+    }
+
+    // 수익계산/차트 모드 전환
+    function toggleBox4Mode() {
+        const profitMode = document.getElementById('profitMode');
+        const chartMode = document.getElementById('chartMode');
+        
+        if (chartMode.style.display === 'none') {
+            // 수익계산 모드 -> 차트 모드
+            chartMode.style.display = 'block';
+            // 차트 초기화 (처음 한 번만)
+            if (!document.getElementById('chart4').hasChildNodes()) {
+                updateChart(4);
+            }
+        } else {
+            // 차트 모드 -> 수익계산 모드
+            chartMode.style.display = 'none';
         }
     }
 

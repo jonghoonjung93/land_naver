@@ -746,18 +746,45 @@ def get_tsla():
     except Exception as e:
         return jsonify({"error": str(e)})
 
+@app.route('/stock')
+def get_stock():
+    ticker = request.args.get('ticker', 'TSLA').upper()
+    try:
+        stock_info = stock_check(ticker)
+        if stock_info:
+            response = make_response(jsonify({
+                "symbol": ticker,
+                "market": stock_info["market"],
+                "price": stock_info["price"],
+                "mod": stock_info["mod"],
+                "pct": stock_info["pct"],
+                "time": stock_info["time"]
+            }))
+            # 캐시 방지 헤더 추가
+            response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+            response.headers["Pragma"] = "no-cache"
+            response.headers["Expires"] = "0"
+            return response
+        else:
+            return jsonify({"error": f"{ticker} 주가 정보를 가져올 수 없습니다"})
+    except Exception as e:
+        return jsonify({"error": str(e)})
+
 #-------- 주가 위젯 추가 부분 끝 ---------------------#
 
 #-------- dashboard 추가 부분 시작 ---------------------#
-@app.route('/dash')
-def get_dash():
+@app.route('/dash1')
+def get_dash1():
     return render_template('dashboard1.html')
+@app.route('/dash2')
+def get_dash2():
+    return render_template('dashboard2.html')
 #-------- dashboard 추가 부분 끝 ---------------------#
 
 @app.before_request
 def require_login():    # 로그인 여부 체크
     # allowed_routes = ['index', 'login', 'logout', 'static', 'request_code', 'save_ip']  # 이것들은 로그인이 안되어있어도 정상 작동됨
-    allowed_routes = ['index', 'login', 'logout', 'static', 'request_code', 'save_ip', 'join', 'join_work', 'loginH', 'hash', 'hash_password', 'login_work', 'bal_data', 'get_tsla', 'get_dash']  # 이것들은 로그인이 안되어있어도 정상 작동됨
+    allowed_routes = ['index', 'login', 'logout', 'static', 'request_code', 'save_ip', 'join', 'join_work', 'loginH', 'hash', 'hash_password', 'login_work', 'bal_data', 'get_tsla', 'get_dash1', 'get_dash2', 'get_stock']  # 이것들은 로그인이 안되어있어도 정상 작동됨
     # print(request.endpoint)
     # print(session.get('userid'))
     if request.endpoint not in allowed_routes and 'userid' not in session:

@@ -120,8 +120,8 @@ def summertime_check():
 	is_dst = now.dst() != timedelta(0)
 	return is_dst
 
-def stock_check():
-	printL("-- stock check start")
+def stock_check(ticker="TSLA"):
+	printL(f"-- stock check start: {ticker}")
 	options = Options()
 
 	result = mode_check()
@@ -151,21 +151,30 @@ def stock_check():
 			kst_start = kst_now.replace(hour=10, minute=0, second=0, microsecond=0)
 			kst_end = kst_now.replace(hour=18, minute=0, second=0, microsecond=0)
 		
-		# 평일 오전 09:00 ~ 17:00 체크 (Overnight 장일때)
-		if kst_start <= kst_now <= kst_end and kst_now.weekday() <= 4:
+		# 평일 오전 09:00 ~ 17:00 체크 (Overnight 장일때) OR TSLA가 아닐 때 (검색 방식 사용)
+		is_overnight_time = kst_start <= kst_now <= kst_end and kst_now.weekday() <= 4
+		
+		# if is_overnight_time or ticker != "TSLA":
+		if is_overnight_time:
 			url1 = "https://app.webull.com/stocks"
 			driver.get(url1)
 			action = ActionChains(driver)
 			time.sleep(3)
 
-			# TSLA 검색
+			# 검색
 			# Symbol/Name 플레이스홀더가 있는 입력창 찾기
 			search_box = driver.find_element(By.XPATH, "//input[@placeholder='Symbol/Name']")
-			search_box.send_keys("TSLA")
+			search_box.send_keys(ticker)
 			time.sleep(2)
-			# Tesla 검색결과 클릭
-			tesla_result = driver.find_element(By.XPATH, "//span[text()='Tesla Inc']")
-			tesla_result.click()
+			
+			if ticker == "TSLA":
+				# Tesla 검색결과 클릭 (기존 로직 유지)
+				tesla_result = driver.find_element(By.XPATH, "//span[text()='Tesla Inc']")
+				tesla_result.click()
+			else:
+				# 다른 종목은 엔터키 입력
+				search_box.send_keys(Keys.ENTER)
+				
 			time.sleep(3)
 
 			# BeautifulSoup으로 파싱 (docker Linux 에서 파싱이 안되는 부분을 해결하기 위함)
@@ -179,12 +188,23 @@ def stock_check():
 				# printL("p_tags is null")
 				small_v = soup.select_one('#DomWrap > div:nth-child(2) > div:nth-child(3)')# After 어쩌구 부분의 주가를 가져옴(xpath)
 				text_parts = []
-				for div in small_v.find_all('div'):
-					div_text = div.text.strip()
-					if div_text:  # 빈 텍스트가 아닌 경우만 추가
-						text_parts.append(div_text)
-				# printL(text_parts)
-				result1 = f"{text_parts[0]}_H {text_parts[2]} {text_parts[3]} {text_parts[4]}"	# _H는 Holiday를 의미함
+				if small_v:
+					for div in small_v.find_all('div'):
+						div_text = div.text.strip()
+						if div_text:  # 빈 텍스트가 아닌 경우만 추가
+							text_parts.append(div_text)
+					# printL(text_parts)
+					if len(text_parts) >= 5:
+						result1 = f"{text_parts[0]}_H {text_parts[2]} {text_parts[3]} {text_parts[4]}"	# _H는 Holiday를 의미함
+					else:
+						result1 = "Data Not Found"
+				else:
+					# 다른 구조일 수 있음 (정규장 등)
+					# 정규장일 경우 가격 표시 위치가 다를 수 있음. 일단 TSLA 외 종목은 검색결과 화면 구조에 의존
+					# 간단히 화면 텍스트 전체에서 가격 패턴 찾기 시도?
+					# 일단 TSLA가 아닌 경우에도 기존 로직 시도.
+					result1 = "Structure mismatch"
+
 			else:	# p_tags 에 뭐가 있을때 (즉, 일반적인 평일 낮)
 				# p 태그 내의 span 태그들을 찾기
 				for p_tag in p_tags:
@@ -200,9 +220,10 @@ def stock_check():
 			result1 = result1 + " " + formatted_time
 			# printL(result1)
 		else:
-			url1 = "https://www.webull.com/quote/nasdaq-tsla"
+			# url1 = "https://www.webull.com/quote/nasdaq-tsla"
+			url1 = f"https://www.webull.com/quote/nasdaq-{ticker}"
 
-			# webull TSLA 주가 조회
+			# webull 주가 조회
 			driver.get(url1)
 			action = ActionChains(driver)
 			time.sleep(3)
@@ -218,7 +239,7 @@ def stock_check():
 			result3 = result1.replace("Opening", f"Open: {result2}")
 			stock_info = parse_stock_info(result3)
 			if stock_info:
-				printL(f"TSLA 주가 정보: {stock_info}")
+				printL(f"{ticker} 주가 정보: {stock_info}")
 				return stock_info
 			return None
 		else:	# Pre Market(검증O), After Hours(검증O), Overnight(검증O) 일때
