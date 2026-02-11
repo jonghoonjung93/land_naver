@@ -133,12 +133,13 @@
         padding: 10px;
         display: flex;
         flex-direction: column;
-        gap: 8px;
+        gap: 4px;
       }
       .market-row {
         display: flex;
         justify-content: space-between;
-        font-size: 12px;
+        align-items: center;
+        font-size: 14px;
         padding: 5px 0;
         border-bottom: 1px solid #333;
       }
@@ -147,10 +148,12 @@
       }
       .market-label {
         color: #9ca3af;
+        font-size: 13px;
       }
       .market-value {
         font-weight: bold;
         font-family: monospace;
+        font-size: 15px;
       }
       .profit-calculation {
         flex: 1;
@@ -358,7 +361,7 @@
                 <div class="market-row"><span class="market-label">등락:</span><span class="market-value" id="box1_changeInfo">-</span></div>
                 <div class="market-row"><span class="market-label">등락률:</span><span class="market-value" id="box1_pctInfo">-</span></div>
                 <div class="market-row"><span class="market-label">시간:</span><span class="market-value" id="box1_timeInfo">-</span></div>
-                <div class="market-row" style="margin-top: 8px"><span class="market-label">상태:</span><span class="market-value" id="box1_statusInfo">-</span></div>
+                <div class="market-row" style="margin-top: 8px"><span class="market-label">상태:</span><span class="market-value" id="box1_statusInfo" style="font-size: 12px">-</span></div>
               </div>
               <div class="profit-calculation">
                 <div class="profit-results">
@@ -461,7 +464,7 @@
                 <div class="market-row"><span class="market-label">등락:</span><span class="market-value" id="box4_changeInfo">-</span></div>
                 <div class="market-row"><span class="market-label">등락률:</span><span class="market-value" id="box4_pctInfo">-</span></div>
                 <div class="market-row"><span class="market-label">시간:</span><span class="market-value" id="box4_timeInfo">-</span></div>
-                <div class="market-row" style="margin-top: 8px"><span class="market-label">상태:</span><span class="market-value" id="box4_statusInfo">-</span></div>
+                <div class="market-row" style="margin-top: 8px"><span class="market-label">상태:</span><span class="market-value" id="box4_statusInfo" style="font-size: 12px">-</span></div>
               </div>
               <div class="profit-calculation">
                 <div class="profit-results">
