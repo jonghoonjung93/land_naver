@@ -159,13 +159,13 @@ def stock_check(ticker="TSLA"):
 			url1 = "https://app.webull.com/stocks"
 			driver.get(url1)
 			action = ActionChains(driver)
-			time.sleep(3)
+			time.sleep(2)
 
 			# 검색
 			# Symbol/Name 플레이스홀더가 있는 입력창 찾기
 			search_box = driver.find_element(By.XPATH, "//input[@placeholder='Symbol/Name']")
 			search_box.send_keys(ticker)
-			time.sleep(2)
+			time.sleep(1)
 			
 			if ticker == "TSLA":
 				# Tesla 검색결과 클릭 (기존 로직 유지)
@@ -175,7 +175,7 @@ def stock_check(ticker="TSLA"):
 				# 다른 종목은 엔터키 입력
 				search_box.send_keys(Keys.ENTER)
 				
-			time.sleep(3)
+			time.sleep(1)
 
 			# BeautifulSoup으로 파싱 (docker Linux 에서 파싱이 안되는 부분을 해결하기 위함)
 			html = driver.find_element("id", "DomWrap").get_attribute("outerHTML")
@@ -226,7 +226,7 @@ def stock_check(ticker="TSLA"):
 			# webull 주가 조회
 			driver.get(url1)
 			action = ActionChains(driver)
-			time.sleep(3)
+			time.sleep(2)
 			# result1 = driver.find_element(By.CLASS_NAME, "csr134").text	# csr134 -> csr133 이런식으로 class 이름이 자꾸 바뀜
 			result1 = driver.find_element(By.XPATH, '//*[@id="app"]/section/div[1]/div/div[2]/div[1]/div[2]/div[2]/div[2]/div').text
 			# printL(result1)
