@@ -165,7 +165,7 @@ def stock_check(ticker="TSLA"):
 			# Symbol/Name 플레이스홀더가 있는 입력창 찾기
 			search_box = driver.find_element(By.XPATH, "//input[@placeholder='Symbol/Name']")
 			search_box.send_keys(ticker)
-			time.sleep(1)
+			time.sleep(2)
 			
 			if ticker == "TSLA":
 				# Tesla 검색결과 클릭 (기존 로직 유지)
@@ -175,7 +175,7 @@ def stock_check(ticker="TSLA"):
 				# 다른 종목은 엔터키 입력
 				search_box.send_keys(Keys.ENTER)
 				
-			time.sleep(1)
+			time.sleep(2)
 
 			# BeautifulSoup으로 파싱 (docker Linux 에서 파싱이 안되는 부분을 해결하기 위함)
 			html = driver.find_element("id", "DomWrap").get_attribute("outerHTML")
