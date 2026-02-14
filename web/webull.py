@@ -78,7 +78,9 @@ def convert_est_to_kst(est_time_str):
 def parse_stock_info(result):
 	try:
 		# 정규표현식으로 데이터 분리
-		pattern = r'(.+?):\s*([\d.]+)\s*([+-][\d.]+)\s*([+-][\d.%]+)\s*(.+)'
+		# pattern = r'(.+?):\s*([\d.]+)\s*([+-][\d.]+)\s*([+-][\d.%]+)\s*(.+)'
+		# 0 또는 0.00 같은 경우 부호가 없을 수 있으므로 [+-]? 로 수정
+		pattern = r'(.+?):\s*([\d.]+)\s*([+-]?[\d.]+)\s*([+-]?[\d.%]+)\s*(.+)'
 		match = re.match(pattern, result)
 		
 		if match:
